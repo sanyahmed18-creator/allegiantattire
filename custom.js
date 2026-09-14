@@ -1923,3 +1923,60 @@
   setTimeout(run, 2000);
   setTimeout(run, 4000);
 })();
+
+/* ============================================================
+ * v23 — Lazy video playback (SEO/perf fix)
+ * Videos no longer autoplay on load (bundle patch: autoPlay:!1).
+ * This plays a video only while it is near/inside the viewport and
+ * pauses it when it leaves — initial page load downloads posters
+ * (preload="metadata") instead of ~12 MB of MP4.
+ * ============================================================ */
+(function () {
+  if (window.__AA_LAZY_VIDEO_V23__) return;
+  window.__AA_LAZY_VIDEO_V23__ = true;
+
+  function boot() {
+    if (!("IntersectionObserver" in window)) return;
+    var seen = new WeakSet();
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var v = entries[i].target;
+        if (entries[i].isIntersecting) {
+          var pr = v.play();
+          if (pr && pr.catch) pr.catch(function () {});
+        } else if (!v.paused) {
+          v.pause();
+        }
+      }
+    }, { rootMargin: "120px", threshold: 0.15 });
+
+    function watch(v) {
+      if (seen.has(v)) return;
+      seen.add(v);
+      v.setAttribute("preload", "metadata");
+      io.observe(v);
+    }
+    function scan(root) {
+      if (!root) return;
+      if (root.tagName === "VIDEO") { watch(root); return; }
+      var list = root.querySelectorAll ? root.querySelectorAll("video") : [];
+      for (var i = 0; i < list.length; i++) watch(list[i]);
+    }
+
+    scan(document);
+    new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) {
+        var add = muts[i].addedNodes;
+        for (var j = 0; j < add.length; j++) {
+          if (add[j] && add[j].nodeType === 1) scan(add[j]);
+        }
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();

@@ -1,0 +1,53 @@
+# ===================================================================
+# Allegiant Attire — robots.txt
+# -------------------------------------------------------------------
+# RIGHT NOW: your robots.txt is Cloudflare's auto-generated "Managed
+# content" block. It contains "Allow: /" for Googlebot (fine) BUT it
+# also Disallows: GPTBot, ClaudeBot, CCBot, Google-Extended,
+# Amazonbot, Applebot-Extended, meta-externalagent.
+#
+# Those are the crawlers behind ChatGPT search, Claude, Perplexity and
+# AI Overviews grounding. If you want to be recommended when someone
+# asks "best custom t-shirt manufacturer in Dubai", you need them in.
+#
+# HOW TO APPLY: Cloudflare Dashboard -> your zone -> Settings (or
+# "Rules" on the new UI) -> Robots.txt -> switch OFF "Managed robots.txt"
+# / AI Crawl Control, then serve this file from public/robots.txt.
+# ===================================================================
+
+User-agent: *
+Allow: /
+
+# --- search engines (must stay allowed) ---
+User-agent: Googlebot
+Allow: /
+User-agent: Googlebot-Image
+Allow: /
+User-agent: Bingbot
+Allow: /
+
+# --- AI search / answer engines (currently blocked for you) ---
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Applebot
+Allow: /
+User-agent: CCBot
+Allow: /
+
+# --- keep model *training* off if you like (search still allowed) ---
+User-agent: Google-Extended
+Disallow: /
+User-agent: Applebot-Extended
+Disallow: /
+
+Sitemap: https://allegiantattire.store/sitemap.xml
