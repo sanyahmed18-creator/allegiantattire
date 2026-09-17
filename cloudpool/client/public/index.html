@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudPool — One Big Drive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-mark">☁️</div>
+      <div>
+        <h1>CloudPool</h1>
+        <p>All your cloud accounts. One big drive.</p>
+      </div>
+    </div>
+    <button id="btn-upload" class="btn primary">⬆ Upload file</button>
+    <input type="file" id="file-input" hidden multiple>
+  </header>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Pool meter -->
+  <section class="card pool-card">
+    <div class="pool-top">
+      <div>
+        <div class="pool-free" id="pool-free">—</div>
+        <div class="pool-sub">free of <span id="pool-total">—</span> pooled storage</div>
+      </div>
+      <div class="pool-stats">
+        <div><span id="stat-accounts">0</span><label>accounts</label></div>
+        <div><span id="stat-files">0</span><label>files</label></div>
+      </div>
+    </div>
+    <div class="meter"><div class="meter-fill" id="pool-meter"></div></div>
+    <div class="meter-legend" id="pool-legend"></div>
+  </section>
+
+  <div class="grid">
+    <!-- Accounts -->
+    <section class="card">
+      <div class="card-head">
+        <h2>Connected accounts</h2>
+      </div>
+      <div id="accounts-list" class="accounts"></div>
+      <div class="connect-row" id="connect-row"></div>
+      <p class="hint">💡 Every account you connect adds its free space to the pool. Connect enough accounts and you reach 4–5&nbsp;TB.</p>
+    </section>
+
+    <!-- Files -->
+    <section class="card">
+      <div class="card-head">
+        <h2>Files</h2>
+        <span class="hint" id="drop-hint">drag &amp; drop anywhere to upload</span>
+      </div>
+      <div id="files-list" class="files"></div>
+    </section>
+  </div>
+
+  <footer>
+    CloudPool routes every file to the connected account with the most free space — you just see one drive.
+  </footer>
+</div>
+<div id="dropzone" class="dropzone hidden"><div>Drop to upload ⬇</div></div>
+<script src="app.js"></script>
+</body>
+</html>

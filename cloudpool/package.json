@@ -1,0 +1,16 @@
+{
+  "name": "cloudpool",
+  "version": "1.0.0",
+  "description": "CloudPool - unify multiple cloud storage accounts (Google Drive, Dropbox, OneDrive) into one big virtual drive",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
