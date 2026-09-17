@@ -33,10 +33,40 @@ Each provider needs the redirect URI `<YOUR_APP_URL>/api/auth/<provider>/callbac
 
 You can connect **multiple accounts of the same provider** — e.g. 10 Gmail accounts × 15 GB = 150 GB pooled, plus Dropbox and OneDrive accounts on top.
 
-### A note on "Gmail" and "TeraBox"
+## Connecting TeraBox (1 TB free per account)
 
-- **Gmail** itself isn't a file store — its storage is Google Drive. CloudPool uses the Google Drive API, which is the correct way to use Google's 15 GB per account.
-- **TeraBox** has no official public API and blocks third-party clients, so there's no reliable/safe way to integrate it. Its 1 TB free tier also throttles heavily. If you want big pools cheaply, multiple Google/Microsoft accounts or an S3-compatible provider are far more dependable. A TeraBox adapter could be added later if they ever ship a public API — the adapter interface (`server/providers/`) makes new providers a ~150-line file.
+TeraBox has **no official OAuth API**, so CloudPool connects using your account's session cookie instead:
+
+1. Log in at [terabox.com](https://www.terabox.com) in your browser
+2. Press **F12** → **Application** (Chrome) / **Storage** (Firefox) → **Cookies** → `https://www.terabox.com`
+3. Copy the value of the cookie named **`ndus`**
+4. In CloudPool, click **+ TeraBox** and paste it
+
+Repeat with different TeraBox accounts to stack multiple 1 TB pools. Caveats to know:
+
+- This uses a community-reverse-engineered API (`terabox-api` npm package) — it can break if TeraBox changes their site, and heavy automated use may violate their ToS.
+- The `ndus` cookie is long-lived but does expire eventually; just reconnect the account when it does.
+- Free TeraBox throttles download speeds and caps files at 4 GB.
+
+### A note on "Gmail"
+
+**Gmail** itself isn't a file store — its storage is Google Drive. CloudPool uses the Google Drive API, which is the correct way to use Google's 15 GB per account.
+
+## Reaching 5 TB: providers that give ~1 TB per account
+
+| Provider | Free storage | CloudPool support | Notes |
+|---|---|---|---|
+| **TeraBox** | **1 TB** | ✅ built-in (cookie) | Only mainstream service giving 1 TB free; slow downloads, 4 GB file cap, ads |
+| MEGA | 20 GB | ➕ addable | Best "real" free tier with proper apps; ~5 GB/day transfer limit |
+| Google Drive | 15 GB | ✅ built-in (OAuth) | Reliable, fast, proper API |
+| Blomp | 200 GB | ➕ addable | Lesser-known, 200 GB free |
+| Degoo | 20 GB | ❌ | No API, aggressive account deletion policy |
+
+**Realistic 5 TB plans:**
+
+- **Free (5× TeraBox):** 5 TeraBox accounts × 1 TB = **5 TB free** — works today in CloudPool, but expect throttled speeds and unofficial-API fragility.
+- **Cheap & reliable:** [IDrive](https://www.idrive.com) 10 TB ≈ $80/yr, or Backblaze B2 at $6/TB/mo (≈$30/mo for 5 TB) — S3-compatible adapters are easy to add.
+- **Mixed (recommended):** 3–4 TeraBox accounts for bulk cold storage + Google Drive/OneDrive accounts for files you need fast and dependable. CloudPool's smart routing handles the spread automatically.
 
 ## Adding a new provider
 

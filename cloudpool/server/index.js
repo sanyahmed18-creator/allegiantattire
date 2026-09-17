@@ -61,8 +61,22 @@ async function accountQuota(account) {
 // ---- API: providers & accounts ----------------------------------------
 app.get('/api/providers', (req, res) => {
   res.json(Object.values(providers).map(p => ({
-    id: p.id, name: p.name, color: p.color, oauth: p.oauth, configured: p.configured(),
+    id: p.id, name: p.name, color: p.color, oauth: p.oauth,
+    configured: p.configured(), inputs: p.inputs || null,
   })));
+});
+
+// Connect a provider that uses pasted credentials (e.g. TeraBox "ndus" cookie)
+app.post('/api/connect/:provider', async (req, res) => {
+  try {
+    const provider = getProvider(req.params.provider);
+    if (!provider.connectWithInput) return res.status(400).json({ error: 'This provider uses OAuth — use the connect button.' });
+    const info = await provider.connectWithInput(req.body || {});
+    const acc = addAccount({ id: crypto.randomUUID(), provider: provider.id, ...info, addedAt: Date.now() });
+    res.json({ ok: true, email: acc.email });
+  } catch (e) {
+    res.status(400).json({ error: String(e.message || e) });
+  }
 });
 
 app.get('/api/accounts', async (req, res) => {

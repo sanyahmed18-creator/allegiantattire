@@ -82,7 +82,10 @@ async function loadAccounts() {
     btn.className = 'connect-btn';
     btn.disabled = p.oauth && !p.configured;
     btn.innerHTML = `<span class="dot" style="background:${p.color}"></span> + ${p.name} ${p.oauth && !p.configured ? '<small>(add API keys in .env)</small>' : ''}`;
-    btn.onclick = () => { window.location.href = `/api/auth/${p.id}/start`; };
+    btn.onclick = () => {
+      if (p.inputs) openConnectModal(p);
+      else window.location.href = `/api/auth/${p.id}/start`;
+    };
     row.appendChild(btn);
   }
 
@@ -135,6 +138,47 @@ async function loadFiles() {
     refresh();
     toast('File deleted');
   });
+}
+
+// ---------- credential-based connect (TeraBox etc.) ----------
+function openConnectModal(provider) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Connect ${provider.name}</h3>
+      ${provider.inputs.map(inp => `
+        <label class="modal-label">${inp.label}</label>
+        <p class="modal-help">${inp.help || ''}</p>
+        <textarea class="modal-input" data-key="${inp.key}" rows="3" placeholder="Paste value here…"></textarea>
+      `).join('')}
+      <div class="modal-actions">
+        <button class="btn" data-act="cancel">Cancel</button>
+        <button class="btn primary" data-act="connect">Connect</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('[data-act="cancel"]').onclick = () => overlay.remove();
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.querySelector('[data-act="connect"]').onclick = async () => {
+    const body = {};
+    overlay.querySelectorAll('.modal-input').forEach(t => body[t.dataset.key] = t.value.trim());
+    const btn = overlay.querySelector('[data-act="connect"]');
+    btn.disabled = true; btn.textContent = 'Connecting…';
+    try {
+      const r = await api(`/api/connect/${provider.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      overlay.remove();
+      toast(`✓ ${provider.name} connected (${r.email}) — storage added to the pool!`);
+      refresh();
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Connect';
+      toast(e.message, 'err');
+    }
+  };
 }
 
 function refresh() {
