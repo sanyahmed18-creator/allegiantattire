@@ -48,7 +48,54 @@
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="preload" as="image" href="/images/hero-apparel.webp" type="image/webp" fetchpriority="high" />
 
-    <script type="application/ld+json">
+   <!-- ✅ CORRECT SCHEMA TEMPLATE (Example: /custom-t-shirts-dubai/) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://allegiantattire.store/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Custom T-Shirts in Dubai",
+          "item": "https://allegiantattire.store/custom-t-shirts-dubai/"
+        }
+      ]
+    },
+    {
+      "@type": "Service",
+      "@id": "https://allegiantattire.store/custom-t-shirts-dubai/#service",
+      "serviceType": "Custom T-Shirts in Dubai",
+      "name": "Custom T-Shirts in Dubai",
+      "description": "Custom t-shirts in Dubai: 180–240 GSM crew necks with DTF, screen print or embroidery. MOQ 10 pcs, same-day DTF, 1–2 day UAE delivery.",
+      "url": "https://allegiantattire.store/custom-t-shirts-dubai/",
+      "image": "https://allegiantattire.store/images/p-tee.jpg",
+      "provider": {
+        "@id": "https://allegiantattire.store/#business"
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Dubai" },
+        { "@type": "City", "name": "Ajman" },
+        { "@type": "City", "name": "Sharjah" },
+        { "@type": "City", "name": "Abu Dhabi" }
+      ],
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "AED",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+  ]
+}
+</script> <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
