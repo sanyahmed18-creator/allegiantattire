@@ -977,7 +977,7 @@
 
   // ---- Admin panel: change password + social media links ----
   var PANEL_HEAD_LOC = "src/components/admin.tsx:163:8"; // CATALOG MANAGER header
-  var DEFAULT_PW = ""; // factory password (bundle fallback)
+  var DEFAULT_PW = "Allegiant#Owner2026"; // factory password (bundle fallback)
   function currentAdminPw() {
     var v = null;
     try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
