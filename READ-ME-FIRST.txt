@@ -1,0 +1,27 @@
+UPLOAD THESE TWO FILES — NOTHING ELSE NEEDED
+============================================
+
+Your live site already has the new custom.js and blog pages.
+Two files were missed. Until they are uploaded, the admin
+password is STILL PUBLIC and the footer still shows the Gmail.
+
+FILE 1:  index.html
+  -> upload to the ROOT of your website folder on GitHub
+     (the same place your current index.html lives).
+     GitHub will ask to replace the existing file. Say yes.
+
+FILE 2:  assets/index-CAFUB5Vv.js
+  -> on GitHub, open the folder called  assets
+     then Add file -> Upload files -> drop this file.
+     Same filename, same folder. Replace it.
+
+AFTER BOTH COMMITS:
+  1. Cloudflare dashboard -> Caching -> Configuration -> Purge Everything.
+  2. Open your site in an INCOGNITO window.
+  3. The footer must show INFO@ALLEGIANTATTIRE.STORE.
+  4. Check: view-source must contain  custom.js?v=24  and
+     assets/index-CAFUB5Vv.js?v=11   (the numbers MUST be new,
+     that is what defeats the browser cache).
+  5. The password is gone for good:
+     https://allegiantattire.store/assets/index-CAFUB5Vv.js
+     must not contain  C00lhunter  (Ctrl+F to search the page source).
