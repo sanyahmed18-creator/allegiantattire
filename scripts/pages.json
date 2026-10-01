@@ -1,0 +1,590 @@
+{
+  "_readme": [
+    "This file drives scripts/prerender-seo-pages.mjs.",
+    "Each entry becomes a real, crawlable HTML page at /<slug>/ — the thing your site is missing.",
+    "Fill in the copy you know (real prices, real photos, real client names). Do not leave placeholders live.",
+    "FACT CHECK before publishing: 'foundingYear', the review count and the pieces-delivered figure must be",
+    "true and provable, or remove them. Unverifiable review/rating markup is a Google structured-data violation."
+  ],
+  "business": {
+    "name": "Allegiant Attire",
+    "legalName": "Allegiant Attire Garment Trading",
+    "url": "https://allegiantattire.store/",
+    "phone": "+971582045242",
+    "phoneDisplay": "+971 58 204 5242",
+    "email": "sanyahmed18@gmail.com",
+    "whatsapp": "https://wa.me/971582045242",
+    "streetAddress": "New Industrial Area 2",
+    "locality": "Ajman",
+    "region": "Ajman",
+    "country": "AE",
+    "mapUrl": "https://maps.google.com/?q=New+Industrial+Area+2,+Ajman,+UAE",
+    "hours": "Mon–Sat 9:00–19:00",
+    "foundingYear": "2016",
+    "priceRange": "AED 26 - AED 250",
+    "primaryCity": "Dubai",
+    "serviceCities": [
+      "Dubai",
+      "Ajman",
+      "Sharjah",
+      "Abu Dhabi"
+    ],
+    "sameAs": []
+  },
+  "pages": [
+    {
+      "slug": "custom-t-shirts-dubai",
+      "title": "Custom T-Shirts in Dubai — Bulk, MOQ 10",
+      "description": "Custom t-shirts in Dubai: 180–240 GSM crew necks with DTF, screen print or embroidery. MOQ 10 pcs, same-day DTF, 1–2 day UAE delivery. Get a bulk quote.",
+      "h1": "Custom T-Shirts in Dubai",
+      "heroImage": "/images/p-tee.jpg",
+      "heroAlt": "Blank and custom printed t-shirts on a rail at the Allegiant Attire factory in Ajman, UAE",
+      "lede": "We cut, stitch and print custom t-shirts in our own Ajman facility — no outsourcing, no middleman markup. Send artwork today and DTF samples can be pressed the same day in Dubai.",
+      "intro": "Allegiant Attire is a UAE clothing manufacturer supplying custom t-shirts to brands, schools, gyms, events teams and procurement departments across Dubai, Sharjah, Ajman and Abu Dhabi. Because printing and stitching happen under one roof, we can turn urgent event orders around in hours rather than weeks.",
+      "bullets": [
+        "180–240 GSM combed cotton crew necks, pre-shrunk and wash-tested",
+        "MOQ 10–12 pcs per style for custom blanks; 100 pcs per colour for cut-and-sew",
+        "DTF, screen print, sublimation or embroidery — all in-house",
+        "AED 26–35 per piece for printed blanks depending on GSM and quantity",
+        "Same-day DTF in Dubai; 1–2 day delivery across the UAE",
+        "Size-sorted, poly-bagged and pressed on delivery"
+      ],
+      "table": {
+        "caption": "Indicative pricing — custom printed t-shirts (AED, VAT included)",
+        "head": [
+          "Quantity",
+          "180 GSM DTF",
+          "240 GSM DTF",
+          "Screen print"
+        ],
+        "rows": [
+          [
+            "10–49 pcs",
+            "35",
+            "38",
+            "—"
+          ],
+          [
+            "50–99 pcs",
+            "31",
+            "34",
+            "28"
+          ],
+          [
+            "100–499 pcs",
+            "28",
+            "31",
+            "24"
+          ],
+          [
+            "500+ pcs",
+            "26",
+            "29",
+            "21"
+          ]
+        ]
+      },
+      "sections": [
+        {
+          "h2": "Which print method fits your t-shirt order?",
+          "p": "DTF is the fastest and handles full-colour artwork with no minimum — ideal for launches, onboarding packs and events. Screen printing is cheaper per unit above roughly 100 pieces and survives 50+ washes with Pantone-matched inks. Sublimation is for polyester activewear where you want the colour inside the fibre rather than on top of it."
+        },
+        {
+          "h2": "Turnaround times",
+          "p": "Samples in 5–7 days, bulk production in 2–3 weeks. Rush orders using existing blanks and in-house DTF can be pressed and delivered the same day inside Dubai."
+        },
+        {
+          "h2": "Who we make t-shirts for",
+          "p": "Corporate merch teams, restaurants and cafés, gyms and sports academies, schools, construction and facilities companies, event agencies and streetwear labels starting their first production run."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is the minimum order for custom t-shirts in Dubai?",
+          "a": "10–12 pieces per style for printed blanks. Cut-and-sew factory runs start at 100 pieces per colour. Single-piece DTF printing is available for samples."
+        },
+        {
+          "q": "How fast can you deliver custom t-shirts in Dubai?",
+          "a": "Same day for in-house DTF on existing blanks. 1–2 days for standard custom orders anywhere in the UAE."
+        },
+        {
+          "q": "What fabric weights do you use?",
+          "a": "180–240 GSM combed cotton for tees, pre-shrunk and wash-tested. Heavier 300 GSM+ options available on request."
+        },
+        {
+          "q": "Can you add my own neck label and hang tags?",
+          "a": "Yes — woven neck labels, size chips, hang tags and branded packaging are produced in-house."
+        }
+      ]
+    },
+    {
+      "slug": "custom-polo-shirts-dubai",
+      "title": "Custom Polo Shirts in Dubai — Embroidered",
+      "description": "Embroidered custom polo shirts in Dubai for corporate uniforms, hotels and events. Pique & cotton blends, flat or 3D puff, MOQ 12 pcs. Get a quote.",
+      "h1": "Custom Polo Shirts in Dubai",
+      "heroImage": "/images/p-polo.jpg",
+      "heroAlt": "Embroidered custom polo shirts produced by Allegiant Attire in Ajman, UAE",
+      "lede": "Corporate polos embroidered on Tajima heads in our Ajman factory — flat or 3D puff, up to 15 colours, 8,000 stitches per minute.",
+      "intro": "Polo shirts are the workhorse of UAE corporate uniforms: reception teams, hospitality, retail, clinics and facilities staff. We produce them in-house with woven labels and Pantone-matched thread so the embroidered logo matches your brand exactly.",
+      "bullets": [
+        "Cotton pique and poly-cotton blends, 200–240 GSM",
+        "Flat embroidery or 3D puff, up to 15 thread colours",
+        "Contrast collars, tipped plackets and side vents on request",
+        "MOQ 12 pcs per colour; bulk tiers from 100 pcs",
+        "Size range XS–4XL including women's cut"
+      ],
+      "sections": [
+        {
+          "h2": "Embroidery vs printing on polos",
+          "p": "Embroidery outlasts printing on a polo and reads as premium on a uniform — it is what hotels and corporate clients expect. DTF or screen print is faster and cheaper for short-run event polos with detailed artwork."
+        },
+        {
+          "h2": "Sampling",
+          "p": "We make a physical sample with your logo in 5–7 days so procurement can sign off fabric, fit and thread colour before bulk."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is the MOQ for embroidered polo shirts?",
+          "a": "12 pieces per colour. Digitising your logo is a one-off setup cost."
+        },
+        {
+          "q": "Can you match a specific Pantone thread colour?",
+          "a": "Yes — we match to Pantone and hold thread stock for repeat corporate orders."
+        }
+      ]
+    },
+    {
+      "slug": "custom-hoodies-dubai",
+      "title": "Custom Hoodies in Dubai — 400 GSM Fleece",
+      "description": "Custom hoodies in Dubai: 400 GSM brushed fleece, garment-washed, metal zips, DTF or embroidery. Cut-and-sew from 100 pcs, samples in 5–7 days.",
+      "h1": "Custom Hoodies & Sweatshirts in Dubai",
+      "heroImage": "/images/p-hoodie.jpg",
+      "heroAlt": "Heavyweight custom hoodies and sweatshirts manufactured by Allegiant Attire in the UAE",
+      "lede": "400 GSM brushed fleece, garment-washed, metal zips — cut and sewn in Ajman for brands and merch teams across the UAE.",
+      "intro": "We manufacture heavyweight hoodies, zip-ups, crewnecks and joggers for streetwear labels, universities, gyms and corporate merch. Full cut-and-sew means you choose the fabric weight, the fit and the finishing.",
+      "bullets": [
+        "300–400 GSM brushed fleece, garment-washed for zero shrinkage",
+        "Pullover, full-zip and oversized fits; metal or nylon zips",
+        "Woven labels, custom drawcords, kangaroo or side pockets",
+        "Cut-and-sew MOQ 100 pcs per colour; blanks from 12 pcs",
+        "Sampling 5–7 days, bulk 2–3 weeks"
+      ],
+      "sections": [
+        {
+          "h2": "Fabric and fit options",
+          "p": "Choose between a classic retail fit and an oversized streetwear block. Fleece weight is the single biggest driver of hand feel and price — 300 GSM for a light layer, 400 GSM for a winter-weight hoodie."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is the minimum for cut-and-sew hoodies?",
+          "a": "100 pieces per colour per fabric. Below that we print on existing blanks from 12 pcs."
+        }
+      ]
+    },
+    {
+      "slug": "dtf-printing-dubai",
+      "title": "Same-Day DTF Printing in Dubai — No Minimum",
+      "description": "In-house DTF printing in Dubai & Ajman — no minimum, full colour, same-day pressing for urgent orders. Max A3, 30+ wash cycles. Send artwork today.",
+      "h1": "Same-Day DTF Printing in Dubai",
+      "heroImage": "/images/s-dtf.jpg",
+      "heroAlt": "DTF printing line running at the Allegiant Attire facility — same-day transfers in Dubai",
+      "lede": "Urgent event tomorrow? Our DTF line prints and presses the same day while other suppliers are still sending you a quote.",
+      "intro": "DTF (direct to film) gives you full-colour, photographic artwork on cotton, poly and blends with no weeding and no screens. It is the fastest route to a finished garment in the UAE and it works from a single piece upwards.",
+      "bullets": [
+        "No minimum — from 1 piece",
+        "Full-colour photographic artwork, no weeding, no screens",
+        "Max A3 transfer size",
+        "30+ wash cycles tested",
+        "Works on cotton, polyester and blends, light or dark garments",
+        "Same-day pressing in Dubai; bring your own garments or buy ours"
+      ],
+      "sections": [
+        {
+          "h2": "How same-day DTF works",
+          "p": "Send print-ready artwork before noon and we can print, cure, press and pack the same working day for collection or delivery inside Dubai. Bulk runs move to the same line with a 1–2 day window across the UAE."
+        },
+        {
+          "h2": "DTF vs screen printing",
+          "p": "DTF wins below 100 pieces and for detailed, multi-colour artwork. Screen printing wins above 100 pieces on 1–3 spot colours, where per-unit cost drops and Pantone accuracy matters."
+        },
+        {
+          "h2": "Artwork requirements",
+          "p": "PNG with a transparent background at 300 DPI, or a vector file. We can prepare low-resolution logos for a small setup fee."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Is there a minimum order for DTF printing?",
+          "a": "No. DTF starts at 1 piece, which makes it the cheapest way to sample before a bulk run."
+        },
+        {
+          "q": "Can you do same-day DTF in Dubai?",
+          "a": "Yes, for orders placed before noon on existing garments or our stock blanks."
+        },
+        {
+          "q": "What size transfers can you print?",
+          "a": "Up to A3. Larger artwork is split or moved to sublimation or screen print."
+        },
+        {
+          "q": "How many washes does a DTF print last?",
+          "a": "30+ wash cycles tested when washed inside out at 30°C."
+        }
+      ]
+    },
+    {
+      "slug": "screen-printing-dubai",
+      "title": "Screen Printing in Dubai — Bulk & Pantone",
+      "description": "Screen printing in Dubai for bulk apparel. Pantone-matched inks, 50+ wash durability, best unit pricing above 100 pcs. In-house, no outsourcing.",
+      "h1": "Screen Printing in Dubai",
+      "heroImage": "/images/s-factory.jpg",
+      "heroAlt": "Screen printing production line at Allegiant Attire, Ajman",
+      "lede": "Silk-screen bulk runs that survive 50+ washes, with Pantone-matched inks and per-unit pricing that drops sharply above 100 pieces.",
+      "intro": "Screen printing is still the most cost-effective way to brand apparel at volume in the UAE. We run screens in-house, so there is no third-party lead time added to your order.",
+      "bullets": [
+        "Best value from 100 pcs upward",
+        "Pantone-matched plastisol and water-based inks",
+        "Up to 6 spot colours; simulated process for gradients",
+        "Tested to 50+ wash cycles",
+        "Front, back, sleeve and inside-neck printing"
+      ],
+      "sections": [
+        {
+          "h2": "When to choose screen printing",
+          "p": "If you are ordering more than 100 pieces with a 1–4 colour logo, screen printing beats DTF on price and on wash durability. Below 100 pieces, DTF is usually cheaper because there is no screen setup."
+        }
+      ],
+      "faq": [
+        {
+          "q": "How many colours can you screen print?",
+          "a": "Up to 6 spot colours per placement. Gradients and photographic artwork move to simulated process or DTF."
+        }
+      ]
+    },
+    {
+      "slug": "embroidery-services-dubai",
+      "title": "Embroidery in Dubai — Polos, Caps, Uniforms",
+      "description": "Machine embroidery in Dubai & Ajman: flat and 3D puff, up to 15 colours, Tajima heads at 8,000 stitches/min. Polos, caps, uniforms. MOQ 12 pcs.",
+      "h1": "Embroidery Services in Dubai",
+      "heroImage": "/images/s-dtf.jpg",
+      "heroAlt": "Embroidery heads stitching a custom cap at Allegiant Attire, UAE",
+      "lede": "Flat and 3D puff embroidery for polos, caps, jackets and uniforms — stitched, not stuck on.",
+      "intro": "Embroidery is the finish that makes a uniform look like a uniform. We digitise your logo, stitch a physical sample for approval, then run production on multi-head Tajima machines in Ajman.",
+      "bullets": [
+        "Flat embroidery and 3D puff for caps",
+        "Up to 15 thread colours, Pantone matched",
+        "8,000 stitches per minute across multiple heads",
+        "Left chest, back yoke, sleeve and cap front placements",
+        "MOQ 12 pcs; digitising is a one-off setup"
+      ],
+      "sections": [
+        {
+          "h2": "Digitising and approval",
+          "p": "Every logo is digitised before production. You approve a stitched sample so thread colour, density and placement are locked before bulk runs."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Do you charge for digitising?",
+          "a": "Digitising is a one-off setup fee, waived on repeat orders using the same logo."
+        },
+        {
+          "q": "Can you embroider on my own garments?",
+          "a": "Yes, subject to fabric weight — garments under 180 GSM may pucker."
+        }
+      ]
+    },
+    {
+      "slug": "school-uniforms-uae",
+      "title": "School Uniforms UAE — Bulk Manufacturer",
+      "description": "School uniform manufacturer in the UAE — polos, shirts, trousers, pinafores, sports kits and blazers. Cut & sewn in Ajman with fast termly re-orders.",
+      "h1": "School Uniforms in the UAE",
+      "heroImage": "/images/school-1.jpg",
+      "heroAlt": "School uniforms manufactured in bulk by Allegiant Attire for UAE schools",
+      "lede": "Full school uniform programmes — cut, sewn and embroidered in Ajman, with fast re-orders for mid-year joiners.",
+      "intro": "We supply UAE schools and uniform distributors with a complete programme: polos, shirts, trousers, skirts, pinafores, sports kits, track suits and blazers. Because production is in-house, re-orders do not wait on overseas shipping.",
+      "bullets": [
+        "Polo shirts, woven shirts, trousers, skirts, pinafores, blazers",
+        "PE kits, tracksuits and house-colour sportswear",
+        "Embroidered crest or screen-printed logo",
+        "Size sets XS–XXL with growth allowance",
+        "Bulk tiers with termly re-order windows"
+      ],
+      "sections": [
+        {
+          "h2": "Working with schools and distributors",
+          "p": "We supply schools directly and also act as a manufacturing partner for uniform resellers. Fabric is wash-tested and colourfast so uniforms survive a full academic year."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is the lead time for a school uniform programme?",
+          "a": "Samples in 5–7 days, bulk in 2–3 weeks per style. Re-orders on approved styles ship much faster because patterns and thread are already held."
+        },
+        {
+          "q": "Can you match our existing school colours?",
+          "a": "Yes — we match Pantone references for fabric, thread and trims."
+        }
+      ]
+    },
+    {
+      "slug": "office-corporate-uniforms-dubai",
+      "title": "Corporate Uniforms in Dubai — Custom Branded",
+      "description": "Corporate uniforms in Dubai: embroidered polos, shirts, blazers, scrubs and aprons for hotels, clinics, retail and hospitality. MOQ from 12 pcs.",
+      "h1": "Corporate & Office Uniforms in Dubai",
+      "heroImage": "/images/office-1.jpg",
+      "heroAlt": "Corporate office uniforms and branded workwear manufactured by Allegiant Attire, UAE",
+      "lede": "Branded uniforms for hotels, clinics, retail, restaurants and facilities teams — embroidered, labelled and packed per department.",
+      "intro": "Corporate uniforms need consistency: the same thread colour on every polo, the same fit across XS–4XL, and re-orders that match the original batch. That is what in-house manufacturing gives you.",
+      "bullets": [
+        "Polo shirts, woven shirts, blazers, aprons, scrubs, coveralls",
+        "Department colour-coding and role-specific trims",
+        "Woven neck labels with your brand",
+        "Individual name embroidery available",
+        "Packed and labelled per employee or per department"
+      ],
+      "sections": [
+        {
+          "h2": "Hospitality and F&B",
+          "p": "Aprons, chef coats, waiter polos and front-of-house embroidery, produced in stain-resistant and easy-iron fabrics."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Can you embroider staff names individually?",
+          "a": "Yes — we run name embroidery as a production step, with a name list supplied by you."
+        }
+      ]
+    },
+    {
+      "slug": "construction-safety-uniforms-uae",
+      "title": "Construction & Safety Uniforms UAE — Hi-Vis",
+      "description": "Construction uniforms and hi-vis workwear in the UAE: coveralls, reflective vests and site polos. Cut & sewn in Ajman, bulk tiers from 50 pcs.",
+      "h1": "Construction & Safety Uniforms in the UAE",
+      "heroImage": "/images/const-1.jpg",
+      "heroAlt": "Hi-vis construction uniforms and reflective workwear manufactured in the UAE by Allegiant Attire",
+      "lede": "Hi-vis coveralls, reflective vests and site polos built for UAE heat and built to survive a 12-hour shift.",
+      "intro": "Contractors, facilities management companies and safety suppliers order hi-vis and workwear in volume. We manufacture them in Ajman with reflective tape, reinforced stitching and breathable fabrics suited to Gulf conditions.",
+      "bullets": [
+        "Hi-vis coveralls, reflective vests, safety shirts, site polos",
+        "Class 2 and Class 3 reflective tape configurations",
+        "Breathable poly-cotton suited to UAE summer",
+        "Logo screen printing or embroidery, plus employee names and ID numbers",
+        "Bulk tiers for 50 to 50,000 pieces"
+      ],
+      "sections": [
+        {
+          "h2": "Compliance and specification",
+          "p": "We build to your safety specification and reflective-tape layout. Share the standard you must meet and we will confirm the construction before sampling."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is the MOQ for safety uniforms?",
+          "a": "50 pieces for stock-based hi-vis, 100 per colour for full cut-and-sew."
+        }
+      ]
+    },
+    {
+      "slug": "activewear-manufacturer-uae",
+      "title": "Activewear Manufacturer UAE — Sublimated Kits",
+      "description": "Activewear manufacturer in the UAE — sublimated jerseys, tracksuits, joggers and gym sets with zero-feel all-over print. Team and retail runs.",
+      "h1": "Activewear & Sportswear Manufacturing in the UAE",
+      "heroImage": "/images/p-active.jpg",
+      "heroAlt": "Sublimated activewear and team kits manufactured by Allegiant Attire, UAE",
+      "lede": "All-over dye-sublimation for jerseys, tracksuits, joggers and gym sets — the colour lives inside the fabric, so it never cracks or peels.",
+      "intro": "We produce sublimated sportswear for teams, academies, gyms and retail labels. Sublimation means unlimited colours and gradients at no extra cost, with a zero-feel finish that survives heavy training use.",
+      "bullets": [
+        "Football, basketball, padel, cricket and gym kits",
+        "All-over sublimation — unlimited colours, zero feel, no cracking",
+        "Tracksuits, joggers, hoodies, shorts, compression wear",
+        "Names, numbers and sponsor logos included in the print",
+        "Team runs and retail production runs"
+      ],
+      "sections": [
+        {
+          "h2": "Team kits",
+          "p": "Send us a design or a club crest and we will produce a full kit with player names and numbers sublimated in. Samples in 5–7 days, bulk in 2–3 weeks."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Do you do single team orders?",
+          "a": "Yes. Sublimation has no screen setup, so a single squad kit is economically viable."
+        }
+      ]
+    },
+    {
+      "slug": "custom-caps-dubai",
+      "title": "Custom Caps in Dubai — Embroidered & 3D Puff",
+      "description": "Custom caps in Dubai: embroidered, 3D puff and printed baseball caps, truckers and bucket hats. In-house production in Ajman, MOQ from 12 pcs.",
+      "h1": "Custom Caps in Dubai",
+      "heroImage": "/images/p-cap.jpg",
+      "heroAlt": "Custom embroidered caps produced by Allegiant Attire in the UAE",
+      "lede": "Baseball caps, truckers, snapbacks and bucket hats — embroidered flat or 3D puff, produced in-house in Ajman.",
+      "intro": "Caps are the highest-margin merch item in the UAE market and the hardest to get right. We run dedicated headwear lines so crown shape, brim stitch and embroidery density are consistent across a bulk run.",
+      "bullets": [
+        "Baseball, trucker, snapback, dad hat and bucket styles",
+        "Flat embroidery and 3D puff, up to 15 colours",
+        "Woven or embroidered closure tabs, custom labels",
+        "Cotton twill, washed canvas and mesh backs",
+        "MOQ 12 pcs for branded stock caps; 100+ for full custom"
+      ],
+      "sections": [
+        {
+          "h2": "3D puff vs flat embroidery",
+          "p": "3D puff gives a raised, tactile logo that reads well from a distance — the standard for streetwear and team caps. Flat embroidery is cleaner for small corporate logos."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is the minimum order for custom caps?",
+          "a": "12 pieces when embroidering existing cap stock; 100+ for a fully custom cap build."
+        }
+      ]
+    },
+    {
+      "slug": "private-label-clothing-uae",
+      "title": "Private Label Clothing Manufacturer UAE",
+      "description": "Private label clothing manufacturer in the UAE. Tech pack to bulk, samples in 5–7 days, bulk in 2–3 weeks, woven labels & branded packaging.",
+      "h1": "Private Label Clothing Manufacturing in the UAE",
+      "heroImage": "/images/s-factory.jpg",
+      "heroAlt": "Cut and sew production floor at the Allegiant Attire private label factory in Ajman, UAE",
+      "lede": "From tech pack to bulk — sampling in 5–7 days, bulk in 2–3 weeks, with woven labels and packaging that make a blank garment your brand.",
+      "intro": "We manufacture private label apparel for UAE and regional brands: streetwear, athleisure, kidswear and workwear. Everything from pattern-making to finished, labelled, poly-bagged goods happens in one Ajman facility, so you are not chasing three suppliers across two countries.",
+      "bullets": [
+        "Pattern making, grading and tech pack development",
+        "Fabric sourcing: 180–400 GSM knits, wovens and fleece",
+        "Sampling in 5–7 days; bulk in 2–3 weeks",
+        "Woven neck labels, size chips, hang tags and custom packaging",
+        "Factory-direct tiers from 12 pcs up to 50,000 pcs"
+      ],
+      "sections": [
+        {
+          "h2": "The private label process",
+          "p": "Send a tech pack, a reference garment or even a sketch. We quote fabric and construction, sample it, you approve, we run bulk and deliver size-sorted and labelled."
+        },
+        {
+          "h2": "Branding and packaging",
+          "p": "Woven labels, printed size chips, hang tags, polybags with your logo and custom mailer boxes — the finishing that separates a private label from a printed blank."
+        }
+      ],
+      "faq": [
+        {
+          "q": "What do you need from me to start a private label run?",
+          "a": "A tech pack, a reference garment, or sketches with measurements. We can develop the tech pack for you."
+        },
+        {
+          "q": "What is the bulk MOQ for private label?",
+          "a": "100 pieces per colour per style for cut-and-sew; 12 pieces for branded blanks."
+        },
+        {
+          "q": "Do you handle fabric sourcing?",
+          "a": "Yes — we source certified knits, wovens and fleece in 180–400 GSM weights."
+        }
+      ]
+    },
+    {
+      "slug": "about-us",
+      "title": "About Allegiant Attire — UAE Clothing Factory",
+      "description": "Allegiant Attire is a clothing manufacturer in Ajman, UAE — in-house cutting, stitching, DTF, screen printing, sublimation and embroidery since 2016.",
+      "h1": "About Allegiant Attire",
+      "heroImage": "/images/s-factory.jpg",
+      "heroAlt": "Inside the Allegiant Attire garment factory in New Industrial Area 2, Ajman, UAE",
+      "lede": "A garment factory in New Industrial Area 2, Ajman — cutting, stitching and printing under one roof since 2016.",
+      "intro": "Allegiant Attire was built on a simple problem: UAE brands were waiting weeks for samples and months for bulk, because design, stitching and printing were split across different suppliers and different countries. We put all of it in one building in Ajman.",
+      "sections": [
+        {
+          "h2": "What we do",
+          "p": "Blank and custom apparel for men, women and kids — t-shirts, polos, hoodies, activewear, caps, school uniforms, corporate uniforms and safety wear — plus six in-house decoration methods: DTF, screen printing, sublimation, embroidery, vinyl and heat transfer, and custom labelling."
+        },
+        {
+          "h2": "How we work",
+          "p": "Cut, stitch, print, press, pack. Quality control runs at every stage rather than at the end, which is how we hold re-order consistency across bulk runs."
+        },
+        {
+          "h2": "Where we deliver",
+          "p": "Same-day DTF in Dubai, 1–2 days across the UAE, pressed, poly-bagged and size-sorted on arrival."
+        }
+      ],
+      "bullets": [
+        "Dedicated lines for knits, wovens and headwear",
+        "180–400 GSM certified fabrics, wash-tested",
+        "Same-day DTF, 5-day sampling, 2-week bulk",
+        "Factory-direct pricing from 12 pcs to 50,000 pcs"
+      ],
+      "faq": []
+    },
+    {
+      "slug": "contact",
+      "title": "Contact Allegiant Attire — Get a Bulk Quote",
+      "description": "Get a bulk clothing quote in the UAE. New Industrial Area 2, Ajman. Call or WhatsApp +971 58 204 5242, Mon–Sat 9am–7pm. Replies in under an hour.",
+      "h1": "Request a Callback",
+      "heroImage": "/images/s-factory.jpg",
+      "heroAlt": "Allegiant Attire factory contact — New Industrial Area 2, Ajman, UAE",
+      "lede": "Send your artwork, quantity and deadline. You will get a price and a lead time — usually within the hour, Mon–Sat.",
+      "intro": "Tell us what you need and how many. If your order is urgent, say so and we will route it to the DTF line for same-day pressing in Dubai.",
+      "bullets": [
+        "Phone / WhatsApp: +971 58 204 5242",
+        "Email: sanyahmed18@gmail.com",
+        "Factory: New Industrial Area 2, Ajman, UAE",
+        "Hours: Monday–Saturday, 9:00–19:00",
+        "Delivery: same-day DTF in Dubai, 1–2 days across the UAE"
+      ],
+      "sections": [],
+      "faq": []
+    },
+    {
+      "slug": "blog/choosing-a-bulk-t-shirt-printer-in-the-uae",
+      "title": "Choosing a Bulk T-Shirt Printer in the UAE: 7 Checks",
+      "description": "How to vet a bulk t-shirt printer in the UAE: print methods and real costs, fabric weight truths, MOQ traps and the red flags that cost deadlines.",
+      "h1": "Choosing a Bulk T-Shirt Printer in the UAE",
+      "heroImage": "/images/p-tee.jpg",
+      "heroAlt": "Bulk t-shirt printing in the UAE — printed t-shirts ready for packing",
+      "lede": "Methods, fabric truths, portfolio checks and red flags — how procurement teams vet a garment partner.",
+      "intro": "Most bulk printing orders in the UAE go wrong for the same four reasons: the wrong print method for the quantity, a fabric weight that was quoted but not delivered, a supplier who outsources the print without telling you, and no physical sample before bulk. Here is how to check each one.",
+      "sections": [
+        {
+          "h2": "1. Match the print method to the quantity",
+          "p": "Under 100 pieces, DTF is cheaper because there is no screen setup. Above 100 pieces with 1–4 colours, screen printing wins on unit cost and wash durability. Sublimation is only for polyester. Anyone who quotes the same method for a 30-piece and a 3,000-piece run is not thinking about your cost."
+        },
+        {
+          "h2": "2. Ask for the GSM, then weigh the sample",
+          "p": "A quoted 180 GSM tee and a delivered 160 GSM tee feel completely different. Weigh the sample on a scale — a size L 180 GSM tee should land close to the expected gram weight. Ask for the fabric certificate, not a verbal number."
+        },
+        {
+          "h2": "3. Confirm what is in-house",
+          "p": "Outsourced print adds a third-party lead time you cannot control. Ask which steps happen in the supplier's own facility: cutting, stitching, printing, pressing, packing. Same-day turnaround is only real if the press is on their floor."
+        },
+        {
+          "h2": "4. Demand a physical sample",
+          "p": "A digital mockup proves nothing about ink adhesion, colour accuracy or hand feel. Sampling should take 5–7 days and should be a real garment, printed on the real fabric, at the real size."
+        },
+        {
+          "h2": "5. Check the portfolio for repeat clients",
+          "p": "One-off event work is easy. Look for brands that have re-ordered across multiple seasons — that is the only real evidence of consistency."
+        },
+        {
+          "h2": "6. Watch the MOQ trap",
+          "p": "A low headline price with a 500-piece MOQ is not a low price if you need 80 pieces. Ask for a tiered quote at 50, 100, 250 and 500 so you can see the real curve."
+        },
+        {
+          "h2": "7. Red flags",
+          "p": "No physical address or factory visit offered, no wash-test claim, no per-piece breakdown, prices quoted before knowing the artwork, and urgency used as a sales tactic instead of a production capability."
+        }
+      ],
+      "bullets": [],
+      "faq": [
+        {
+          "q": "What is a fair MOQ for custom t-shirts in the UAE?",
+          "a": "10–12 pieces per style on printed blanks is a reasonable minimum for a genuine manufacturer. Much higher usually means the supplier only wants bulk runs."
+        },
+        {
+          "q": "How long should sampling take?",
+          "a": "5–7 days is standard for a UAE factory with in-house printing. Longer usually means the print is being outsourced."
+        }
+      ]
+    }
+  ]
+}
