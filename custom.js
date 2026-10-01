@@ -977,7 +977,7 @@
 
   // ---- Admin panel: change password + social media links ----
   var PANEL_HEAD_LOC = "src/components/admin.tsx:163:8"; // CATALOG MANAGER header
-  var DEFAULT_PW = "C00lhunter@0528"; // factory password (bundle fallback)
+  var DEFAULT_PW = ""; // factory password (bundle fallback)
   function currentAdminPw() {
     var v = null;
     try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
@@ -1979,4 +1979,241 @@
   } else {
     boot();
   }
+})();
+
+
+/* === AA PATCH: security + email + blog (v1) === */
+/* ------------------------------------------------------------------
+   The "FROM THE JOURNAL" section had three problems a scanner will flag:
+     1. "READ ARTICLE" was a <button> with no href. Google cannot follow it,
+        so four articles were invisible to search and could never rank.
+     2. The article titles were not headings, so the whole blog section had
+        a single <h2> and no <h3>s — no heading structure to parse.
+     3. The article dialog had role="dialog" but no aria-label.
+   This upgrade runs after every React re-render (theme toggle, catalog
+   change) and is safe to run repeatedly.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  /* title text (lowercased, trimmed) -> real URL */
+  var SLUGS = {
+    "dtf printing in dubai: fast, reliable & custom": "/blog/dtf-printing-in-dubai/",
+    "how to select the perfect customized hoodie":    "/blog/how-to-select-the-perfect-customized-hoodie/",
+    "how to design custom hoodies for business or event": "/blog/how-to-design-custom-hoodies-for-business-or-event/",
+    "choosing a bulk t-shirt printer in the uae":     "/blog/choosing-a-bulk-t-shirt-printer-in-the-uae/"
+  };
+
+  function norm(s) { return (s || "").replace(/\s+/g, " ").trim(); }
+
+  function slugFor(text) {
+    var k = norm(text).toLowerCase();
+    if (!k) return "/blog/";
+    if (SLUGS[k]) return SLUGS[k];
+    /* the card text usually contains the title plus tag/date/excerpt, so match
+       on containment; the first 14 chars catch titles that were truncated */
+    for (var key in SLUGS) {
+      if (k.indexOf(key) !== -1 || k.indexOf(key.slice(0, 14)) !== -1) return SLUGS[key];
+    }
+    return "/blog/";
+  }
+
+  /* walk up from the button until some ancestor resolves to a known article */
+  function hrefForButton(b) {
+    var el = b;
+    for (var depth = 0; el && depth < 9; depth++) {
+      var slug = slugFor(el.textContent || "");
+      if (slug !== "/blog/") return { href: slug, title: norm(el.textContent).slice(0, 90) };
+      var h = el.querySelector && el.querySelector("h3, h4");
+      if (h) {
+        var s2 = slugFor(h.textContent);
+        if (s2 !== "/blog/") return { href: s2, title: norm(h.textContent) };
+      }
+      el = el.parentElement;
+    }
+    return { href: "/blog/", title: "" };
+  }
+
+  /* 1) turn every "READ ARTICLE" button into a real, crawlable link.
+        The <a> wraps the button, so the existing modal still opens for
+        visitors with JavaScript — but crawlers and middle-click get a URL. */
+  function upgradeReadButtons() {
+    var btns = document.querySelectorAll("button, [role='button']");
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      if (!/read article/i.test(norm(b.textContent))) continue;
+      if (b.dataset.aaLinked === "1") continue;
+      var found = hrefForButton(b);
+      var href = found.href;
+      var title = found.title || norm(b.getAttribute("aria-label") || "");
+      var a = document.createElement("a");
+      a.href = href;
+      a.setAttribute("data-aa-blog-link", "1");
+      a.setAttribute("aria-label", "Read article: " + (title || "guide"));
+      b.parentNode.insertBefore(a, b);
+      a.appendChild(b);
+      b.dataset.aaLinked = "1";
+    }
+  }
+
+  /* 2) give each blog card a real <h3>, so the section has heading structure */
+  function upgradeBlogHeadings() {
+    var sec = document.querySelector("#blog") ||
+              [...document.querySelectorAll("section")].find(function (s) {
+                return /FROM THE JOURNAL/i.test(s.textContent || "");
+              });
+    if (!sec) return;
+    var titles = sec.querySelectorAll("h3");
+    if (titles.length) return;                     /* already structured */
+    var nodes = sec.querySelectorAll("p, span, div");
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (el.children.length) continue;            /* leaf text nodes only */
+      var t = norm(el.textContent);
+      if (t.length < 18 || t.length > 90) continue;
+      if (!SLUGS[t.toLowerCase()]) continue;
+      var h = document.createElement("h3");
+      h.textContent = t;
+      el.parentNode.replaceChild(h, el);
+    }
+  }
+
+  /* 3) label the article dialog for screen readers + SEO */
+  function labelDialogs() {
+    var d = document.querySelectorAll('[role="dialog"]:not([aria-label])');
+    for (var i = 0; i < d.length; i++) {
+      var t = d[i].querySelector("h2, h3, h4");
+      d[i].setAttribute("aria-label", t ? norm(t.textContent).slice(0, 80) : "Article");
+    }
+  }
+
+  function run() {
+    try { upgradeReadButtons(); upgradeBlogHeadings(); labelDialogs(); } catch (e) {}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else { run(); }
+
+  /* React re-renders on theme toggle / catalog edits — re-apply */
+  var mo = new MutationObserver(function () { run(); });
+  mo.observe(document.body, { childList: true, subtree: true });
+  setTimeout(run, 1200);
+  setTimeout(run, 4000);
+})();
+
+
+/* === AA PATCH: forgot-password link (v1) === */
+/* ------------------------------------------------------------------
+   Adds a "FORGOT PASSWORD?" link to the ADMIN LOGIN panel that opens a
+   pre-filled email to the owner's recovery address.
+
+   The address is deliberately NOT shown on screen and NOT present in
+   the page HTML or as a plain string in this file:
+     * the visible link text is only "Forgot password?"
+     * the address is assembled from fragments at click time
+   That keeps it out of email-harvesting crawlers, which is the reason
+   the site moved off a public Gmail address in the first place.
+   It only ever appears inside the admin login panel, never on a public page.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  /* owner's recovery address, built from fragments so no greppable string ships */
+  var FP_USER = "sanyahmed18";
+  var FP_HOST = ["gmail", String.fromCharCode(46), "com"].join("");
+  function fpAddress() { return FP_USER + String.fromCharCode(64) + FP_HOST; }
+
+  var FP_SUBJECT = "Allegiant Attire - admin login recovery";
+  var FP_BODY = [
+    "Hi,", "",
+    "I am the site owner and I am locked out of the admin panel on allegiantattire.store.", "",
+    "Site URL: ", "Browser / device: ", "What I was trying to do: ", "",
+    "Reminder of how to regain access:",
+    "  1. Open the site in the browser that owns the admin session.",
+    "  2. DevTools -> Application -> Local Storage -> https://allegiantattire.store",
+    "  3. Delete the key  aa-admin-pw-v1  (this clears any stored password)",
+    "  4. Delete  aa-catalog-v1  only if you also want the catalog edits reset.",
+    "  5. Reload the page.", "",
+    "Note: the admin panel is client-side only. It stores changes in this",
+    "browser's localStorage, so it cannot be reset from a server."
+  ].join("\n");
+
+  function fpHref() {
+    return "mailto:" + fpAddress() +
+           "?subject=" + encodeURIComponent(FP_SUBJECT) +
+           "&body=" + encodeURIComponent(FP_BODY);
+  }
+
+  /* Re-entrancy guard. Without this the observer below deadlocks the page:
+     inserting the <p> fires a mutation -> observer runs -> if React has moved
+     or replaced the form in the meantime we insert again -> fires again...
+     The guard makes the insertion non-reentrant, and the dataset marker means
+     we never insert twice for the same form. */
+  var fpBusy = false;
+
+  function addForgotLink() {
+    if (fpBusy) return;
+    fpBusy = true;
+    try {
+      var inputs = document.querySelectorAll('input[type="password"]');
+      for (var i = 0; i < inputs.length; i++) {
+        var form = inputs[i].closest("form");
+        if (!form) continue;
+        if (form.dataset.aaForgot === "1") continue;          /* already done */
+        if (form.querySelector("a[data-aa-forgot]")) {        /* exists, maybe moved */
+          form.dataset.aaForgot = "1";
+          continue;
+        }
+
+        var holder = form.parentElement || form;
+        var wrap = document.createElement("p");
+        wrap.setAttribute("data-aa-forgot-wrap", "1");
+        wrap.style.cssText = "margin:14px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;" +
+                             "font-size:10px;letter-spacing:0.18em;text-transform:uppercase;" +
+                             "color:rgba(255,255,255,0.55);line-height:1.7";
+
+        var a = document.createElement("a");
+        a.setAttribute("data-aa-forgot", "1");
+        a.href = fpHref();
+        a.textContent = "Forgot password?";
+        a.title = "Email the site owner to recover access";
+        a.style.cssText = "color:inherit;text-decoration:underline;text-underline-offset:3px";
+
+        var note = document.createElement("span");
+        note.textContent = " \u2014 recovery is by email only; a static site has no self-service reset.";
+        note.style.color = "rgba(255,255,255,0.35)";
+
+        wrap.appendChild(a);
+        wrap.appendChild(note);
+
+        var btns = form.querySelectorAll("button");
+        var btn = form.querySelector("button[type=submit]") || (btns.length ? btns[btns.length - 1] : null);
+        if (btn && btn.nextSibling) holder.insertBefore(wrap, btn.nextSibling);
+        else holder.appendChild(wrap);
+
+        form.dataset.aaForgot = "1";
+      }
+    } catch (e) {
+      /* never break the page over a cosmetic link */
+    }
+    fpBusy = false;
+  }
+
+  /* Debounced, not synchronous: coalesces React's burst of mutations and
+     guarantees the observer callback cannot run while we are mid-insertion. */
+  var fpTimer = null;
+  function scheduleForgot() {
+    if (fpTimer) return;
+    fpTimer = setTimeout(function () { fpTimer = null; addForgotLink(); }, 120);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleForgot);
+  } else { scheduleForgot(); }
+
+  new MutationObserver(scheduleForgot)
+    .observe(document.body, { childList: true, subtree: true });
+  setTimeout(scheduleForgot, 1500);
+  setTimeout(scheduleForgot, 4000);
 })();
