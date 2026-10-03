@@ -352,7 +352,7 @@
   }
   function mockupGarment(src) {
     if (!src) return "";
-    var m = String(src).match(/(tee|polo|hoodie|vest|active|cap)(-\d+|-[0-9a-fA-F]{6})?\.jpg/i);
+    var m = String(src).match(/(tee|polo|hoodie|vest|active|cap)(-\d+|-[0-9a-fA-F]{6})?\.(?:jpe?g|webp)/i);
     return m ? m[1].toLowerCase() : "";
   }
   function applyMockupTint() {
@@ -371,7 +371,7 @@
     if (hex === "ffffff" || !hex) {
       var wht = back ? BACK_SRC[g] : WHITE_SRC[g];
       var known = isTint || cur.indexOf("/images/back/") === 0 ||
-        !!cur.match(/^\/images\/(tee|polo|hoodie|vest|active|cap)-\d+\.jpg/);
+        !!cur.match(/^\/images\/(tee|polo|hoodie|vest|active|cap)-\d+\.(?:jpe?g|webp)/);
       if (wht && cur !== wht && known) img.setAttribute("src", wht);
       return;
     }
@@ -2216,4 +2216,137 @@
     .observe(document.body, { childList: true, subtree: true });
   setTimeout(scheduleForgot, 1500);
   setTimeout(scheduleForgot, 4000);
+})();
+
+
+/* === AA PATCH: shared password sync (v1) === */
+/* ------------------------------------------------------------------
+   Makes "change password" apply on EVERY device, using a tiny
+   Cloudflare Worker as the shared store (see worker.js in the package).
+
+   How it decides:
+     * the site looks for /aa-worker.txt containing the worker URL.
+       present  -> login and password changes go to the worker,
+                   so a new password works everywhere.
+       absent   -> everything falls back to the old per-browser
+                   behaviour; nothing breaks.
+   ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var AA_WORKER = null;
+  function loadWorkerUrl() {
+    try {
+      fetch("/aa-worker.txt", { cache: "no-store" }).then(function (r) {
+        return r.ok ? r.text() : "";
+      }).then(function (t) {
+        t = (t || "").trim();
+        if (t.indexOf("http") === 0) AA_WORKER = t.replace(/\/+$/, "");
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  loadWorkerUrl();
+
+  var FACTORY = "allegiant2026";
+
+  function storedLocalPw() {
+    var v = null;
+    try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
+    if (!v) return null;
+    try { return decodeURIComponent(escape(atob(v))) || atob(v); }
+    catch (e) { try { return atob(v); } catch (e2) { return null; } }
+  }
+  function localCheck(pw) {
+    var st = storedLocalPw();
+    if (st && pw === st) return true;
+    return pw === FACTORY;
+  }
+
+  /* called by the (patched) bundle login form */
+  window.AA_LOGIN = function (pw, ok, fail) {
+    if (AA_WORKER) {
+      fetch(AA_WORKER + "/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pw: pw })
+      }).then(function (r) { return r.json(); })
+        .then(function (j) { j.ok ? ok() : fail(j.msg || "INCORRECT PASSWORD — TRY AGAIN."); })
+        .catch(function () { localCheck(pw) ? ok() : fail("INCORRECT PASSWORD — TRY AGAIN."); });
+    } else {
+      setTimeout(function () { localCheck(pw) ? ok() : fail("INCORRECT PASSWORD — TRY AGAIN."); }, 250);
+    }
+  };
+
+  function post(path, body) {
+    return fetch(AA_WORKER + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
+
+  /* rewire the change-password card once it exists */
+  function hijackCard() {
+    var save = document.querySelector(".aa-set-save");
+    if (!save || save.dataset.aaSync === "1") return;
+    var card = save.closest(".aa-set-card");
+    if (!card) return;
+    var inputs = card.querySelectorAll("input");
+    if (inputs.length < 3) return;
+    var cur = inputs[0], nw = inputs[1], cf = inputs[2];
+    var msg = card.querySelector("p.aa-set-msg");
+
+    function setMsg(t, good) {
+      if (!msg) return;
+      msg.textContent = t;
+      msg.style.color = good ? "#15803d" : "#b91c1c";
+    }
+
+    var save2 = save.cloneNode(true);
+    save2.dataset.aaSync = "1";
+    save.parentNode.replaceChild(save2, save);
+    save2.addEventListener("click", function () {
+      if ((nw.value || "").length < 6) { setMsg("NEW PASSWORD MUST BE AT LEAST 6 CHARACTERS."); return; }
+      if (nw.value !== cf.value) { setMsg("NEW PASSWORDS DO NOT MATCH."); return; }
+      if (AA_WORKER) {
+        post("/change", { current: cur.value, next: nw.value }).then(function (j) {
+          if (j.ok) {
+            setMsg("PASSWORD UPDATED \u2713 NOW WORKS ON ALL DEVICES.", true);
+            cur.value = ""; nw.value = ""; cf.value = "";
+          } else setMsg(j.msg || "CHANGE FAILED.");
+        }).catch(function () { setMsg("SYNC SERVER NOT REACHABLE — TRY AGAIN."); });
+      } else {
+        if (cur.value !== (storedLocalPw() || FACTORY)) { setMsg("CURRENT PASSWORD IS INCORRECT."); return; }
+        try { localStorage.setItem("aa-admin-pw-v1", btoa(unescape(encodeURIComponent(nw.value)))); } catch (e) {}
+        setMsg("PASSWORD UPDATED — THIS BROWSER ONLY (sync server not configured).", true);
+        cur.value = ""; nw.value = ""; cf.value = "";
+      }
+    });
+
+    var reset = card.querySelector(".aa-set-alt");
+    if (reset && !reset.dataset.aaSync) {
+      var reset2 = reset.cloneNode(true);
+      reset2.dataset.aaSync = "1";
+      reset.parentNode.replaceChild(reset2, reset);
+      reset2.addEventListener("click", function () {
+        if (AA_WORKER) {
+          post("/reset", { current: cur.value }).then(function (j) {
+            if (j.ok) setMsg("RESET \u2713 FACTORY PASSWORD RESTORED ON ALL DEVICES.", true);
+            else setMsg(j.msg || "RESET FAILED.");
+          }).catch(function () { setMsg("SYNC SERVER NOT REACHABLE."); });
+        } else {
+          try { localStorage.removeItem("aa-admin-pw-v1"); } catch (e) {}
+          setMsg("RESET TO FACTORY \u2713", true);
+        }
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hijackCard);
+  } else { hijackCard(); }
+  new MutationObserver(function () { hijackCard(); })
+    .observe(document.body, { childList: true, subtree: true });
+  setTimeout(hijackCard, 1500);
+  setTimeout(hijackCard, 4000);
 })();
