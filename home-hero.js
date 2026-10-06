@@ -1,139 +1,216 @@
 /* ============================================================
-   Allegiant Attire — "On the rail" homepage hero behaviour
-   - desktop: neighbours step aside while a garment is hovered
-   - touch:   the garment nearest the middle of the rail stays lit
-   - both:    gentle pointer parallax + smooth scroll into the shop
-   The hero lives outside #root, so a React re-render never wipes it.
+   Allegiant Attire — "On the rail" homepage behaviour
+
+   Mirrors the reference interaction model:
+     • pointer devices: hovering/focusing a garment makes it the active
+       one — it turns from edge-on to face you, the rail accordions
+       open around it, and the caption swaps to that piece
+     • touch: the rail scrolls horizontally and whatever sits nearest
+       the middle becomes active
+     • click/Enter: opens the garment dialog (turntable + details)
+     • menu + about dialogs, marquee, reduced-motion fallbacks
+
+   Lives outside #root, so React hydration cannot wipe it.
    ============================================================ */
 (function () {
   "use strict";
 
   function init() {
-    var hero = document.querySelector(".aa-rail-hero");
-    if (!hero || hero.dataset.aaRailReady === "1") return;
-    hero.dataset.aaRailReady = "1";
+    var shell = document.querySelector(".aa-home-shell");
+    if (!shell || shell.dataset.aaReady === "1") return;
+    shell.dataset.aaReady = "1";
 
-    var track = hero.querySelector(".aa-rail-track");
-    if (!track) return;
+    var scroller = shell.querySelector(".aa-rail-scroll");
+    var garments = Array.prototype.slice.call(shell.querySelectorAll(".aa-garment"));
+    var caption = shell.querySelector(".aa-caption-title");
+    var captionDefault = caption ? caption.textContent : "";
+    var hintWrap = shell.querySelector(".aa-rail-hints");
+    if (!garments.length) return;
 
-    var items = Array.prototype.slice.call(track.querySelectorAll(".aa-rail-item"));
-    if (!items.length) return;
-
-    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* ---------- desktop: lift one, step the neighbours aside ---------- */
-    function clearState() {
-      items.forEach(function (el) {
-        el.classList.remove("is-hot", "is-prev", "is-next");
-      });
+    /* ---------- staggered arrival + idle sway, as in the reference ---------- */
+    garments.forEach(function (el, i) {
+      var swing = el.querySelector(".aa-garment-swing");
+      if (!swing) return;
+      swing.style.setProperty("--arrival", (i * 60 + 80) + "ms");
+      swing.style.setProperty("--sway", "-" + (i * 0.37).toFixed(2) + "s");
+    });
+
+    /* ---------- caption swapping ---------- */
+    function setCaption(text) {
+      if (!caption || caption.textContent === text) return;
+      caption.textContent = text;
+      caption.style.animation = "none";
+      void caption.offsetWidth;            // restart aa-caption-in
+      caption.style.animation = "";
     }
 
-    function focusItem(i) {
-      clearState();
-      if (items[i]) items[i].classList.add("is-hot");
-      if (items[i - 1]) items[i - 1].classList.add("is-prev");
-      if (items[i + 1]) items[i + 1].classList.add("is-next");
+    function activate(index) {
+      garments.forEach(function (el, i) {
+        el.classList.toggle("is-active", i === index);
+      });
+      if (index === -1) {
+        setCaption(captionDefault);
+        if (hintWrap) hintWrap.classList.remove("is-detail");
+      } else {
+        setCaption(garments[index].dataset.name || captionDefault);
+        if (hintWrap) hintWrap.classList.add("is-detail");
+      }
     }
 
     if (finePointer) {
-      items.forEach(function (el, i) {
-        el.addEventListener("pointerenter", function () { focusItem(i); });
-        el.addEventListener("focusin", function () { focusItem(i); });
+      garments.forEach(function (el, i) {
+        el.addEventListener("pointerenter", function () { activate(i); });
+        el.addEventListener("focus", function () { activate(i); });
       });
-      track.addEventListener("pointerleave", clearState);
-      track.addEventListener("focusout", function (e) {
-        if (!track.contains(e.relatedTarget)) clearState();
-      });
+      var stage = shell.querySelector(".aa-garments");
+      if (stage) stage.addEventListener("pointerleave", function () { activate(-1); });
     }
 
-    /* ---------- pointer parallax across the rail ---------- */
-    if (finePointer && !reduced) {
-      var raf = 0;
-      var targetX = 0;
-      var currentX = 0;
-
-      hero.addEventListener("pointermove", function (e) {
-        targetX = ((e.clientX / window.innerWidth) - 0.5) * -18;
-        if (!raf) raf = window.requestAnimationFrame(step);
-      });
-
-      hero.addEventListener("pointerleave", function () {
-        targetX = 0;
-        if (!raf) raf = window.requestAnimationFrame(step);
-      });
-
-      var step = function () {
-        currentX += (targetX - currentX) * 0.08;
-        track.style.transform = "translate3d(" + currentX.toFixed(2) + "px,0,0)";
-        if (Math.abs(targetX - currentX) > 0.1) {
-          raf = window.requestAnimationFrame(step);
-        } else {
-          raf = 0;
-        }
-      };
-    }
-
-    /* ---------- touch: keep the centred garment lit ---------- */
-    if (!finePointer) {
+    /* ---------- touch: the centred garment is the active one ---------- */
+    if (!finePointer && scroller) {
       var ticking = false;
-
-      var highlightCentre = function () {
-        var box = track.getBoundingClientRect();
+      var centreScan = function () {
+        var box = scroller.getBoundingClientRect();
         var centre = box.left + box.width / 2;
-        var best = 0;
-        var bestDist = Infinity;
-
-        items.forEach(function (el, i) {
+        var best = 0, bestDist = Infinity;
+        garments.forEach(function (el, i) {
           var r = el.getBoundingClientRect();
           var d = Math.abs(r.left + r.width / 2 - centre);
           if (d < bestDist) { bestDist = d; best = i; }
         });
-
-        items.forEach(function (el, i) {
-          el.classList.toggle("is-hot", i === best);
-        });
+        activate(best);
         ticking = false;
       };
-
-      track.addEventListener("scroll", function () {
+      scroller.addEventListener("scroll", function () {
         if (ticking) return;
         ticking = true;
-        window.requestAnimationFrame(highlightCentre);
+        window.requestAnimationFrame(centreScan);
       }, { passive: true });
-
-      window.addEventListener("resize", highlightCentre);
-      window.setTimeout(highlightCentre, 60);
+      window.addEventListener("resize", centreScan);
+      window.setTimeout(centreScan, 80);
     }
 
-    /* ---------- smooth scroll into the storefront ---------- */
-    hero.addEventListener("click", function (e) {
-      var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
-      if (!link) return;
-      var id = link.getAttribute("href").slice(1);
-      var target = id && document.getElementById(id);
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({
-        behavior: reduced ? "auto" : "smooth",
-        block: "start"
+    /* ---------- garment dialog ---------- */
+    var dialog = document.getElementById("aa-garment-dialog");
+    var items = garments.map(function (el) {
+      return {
+        name: el.dataset.name || "",
+        index: el.dataset.index || "",
+        spec: el.dataset.spec || "",
+        copy: el.dataset.copy || "",
+        href: el.dataset.href || "/contact/",
+        front: el.dataset.front || "",
+        back: el.dataset.back || ""
+      };
+    });
+    var current = 0;
+
+    function paint(i) {
+      if (!dialog) return;
+      current = (i + items.length) % items.length;
+      var it = items[current];
+      var turntable = dialog.querySelector(".aa-detail-turntable");
+      var controls = dialog.querySelector(".aa-view-controls");
+
+      dialog.querySelector(".aa-detail-kind").textContent = it.spec;
+      dialog.querySelector(".aa-detail-count").textContent =
+        it.index + " / " + String(items.length).padStart(2, "0");
+      dialog.querySelector(".aa-detail-title").textContent = it.name;
+      dialog.querySelector(".aa-detail-description").textContent = it.copy;
+      dialog.querySelector(".aa-detail-front img").src = it.front;
+      dialog.querySelector(".aa-detail-front img").alt = it.name + " — front view";
+      dialog.querySelector(".aa-detail-page").href = it.href;
+
+      var backImg = dialog.querySelector(".aa-detail-back img");
+      turntable.classList.remove("show-back");
+      if (it.back) {
+        backImg.src = it.back;
+        backImg.alt = it.name + " — back view";
+        controls.hidden = false;
+        controls.querySelectorAll("button").forEach(function (b, bi) {
+          b.classList.toggle("selected", bi === 0);
+        });
+      } else {
+        backImg.removeAttribute("src");
+        controls.hidden = true;
+      }
+    }
+
+    function openDialog(el) {
+      if (!el || typeof el.showModal !== "function") return false;
+      el.showModal();
+      return true;
+    }
+
+    if (dialog) {
+      garments.forEach(function (el, i) {
+        el.addEventListener("click", function () {
+          paint(i);
+          if (!openDialog(dialog)) window.location.href = items[i].href;
+        });
+      });
+
+      dialog.querySelector(".aa-detail-prev").addEventListener("click", function () { paint(current - 1); });
+      dialog.querySelector(".aa-detail-next").addEventListener("click", function () { paint(current + 1); });
+
+      dialog.querySelectorAll(".aa-view-controls button").forEach(function (btn, bi) {
+        btn.addEventListener("click", function () {
+          dialog.querySelector(".aa-detail-turntable").classList.toggle("show-back", bi === 1);
+          dialog.querySelectorAll(".aa-view-controls button").forEach(function (b, j) {
+            b.classList.toggle("selected", j === bi);
+          });
+        });
+      });
+
+      dialog.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") paint(current - 1);
+        if (e.key === "ArrowRight") paint(current + 1);
+      });
+    }
+
+    /* ---------- menu + about dialogs, close buttons, backdrop clicks ---------- */
+    document.querySelectorAll("[data-aa-open]").forEach(function (trigger) {
+      trigger.addEventListener("click", function () {
+        var target = document.getElementById(trigger.getAttribute("data-aa-open"));
+        openDialog(target);
       });
     });
 
-    /* ---------- marquee: duplicate the strip until it covers the band ---------- */
-    var mq = document.querySelector(".aa-mq");
-    if (mq) {
-      var first = mq.querySelector(".aa-mq-track");
-      if (first) {
+    document.querySelectorAll(".aa-dialog").forEach(function (d) {
+      d.querySelectorAll("[data-aa-close]").forEach(function (b) {
+        b.addEventListener("click", function () { d.close(); });
+      });
+      d.addEventListener("click", function (e) {
+        if (e.target === d) d.close();      // click on the backdrop area
+      });
+    });
+
+    /* ---------- marquee: the track is two identical halves ---------- */
+    var track = shell.querySelector(".aa-marquee-track");
+    if (track && !reduced) {
+      var group = track.querySelector(".aa-marquee-group");
+      if (group) {
         var guard = 0;
-        while (mq.scrollWidth < window.innerWidth * 2 && guard < 6) {
-          var clone = first.cloneNode(true);
-          clone.setAttribute("aria-hidden", "true");
-          mq.appendChild(clone);
+        while (track.scrollWidth < window.innerWidth * 2 && guard < 6) {
+          track.appendChild(group.cloneNode(true));
+          track.appendChild(group.cloneNode(true));
           guard++;
         }
       }
     }
+
+    /* ---------- smooth scroll into the storefront ---------- */
+    shell.addEventListener("click", function (e) {
+      var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+      if (!link) return;
+      var target = document.getElementById(link.getAttribute("href").slice(1));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    });
   }
 
   if (document.readyState === "loading") {

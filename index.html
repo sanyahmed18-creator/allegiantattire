@@ -151,199 +151,285 @@
   </head>
   <body>
     <!-- ============================================================
-         ON THE RAIL — homepage hero (static, lives outside #root so the
-         React storefront below can never overwrite it). Styles in
-         /home-hero.css, behaviour in /home-hero.js
+         ON THE RAIL — homepage. Static markup, outside #root so the
+         React storefront can never overwrite it.
+         Styles: /home-hero.css   Behaviour: /home-hero.js
          ============================================================ -->
-    <section class="aa-rail-hero" id="aa-rail-hero" aria-label="Allegiant Attire — custom apparel on the rail">
-      <div class="aa-rail-top">
-        <a class="aa-rail-wordmark" href="/">Allegiant Attire</a>
-        <nav class="aa-rail-topnav" aria-label="Hero links">
-          <a href="#aa-storefront">Shop</a>
-          <a href="/contact/">Quote</a>
-          <a href="https://wa.me/971582045242" rel="nofollow">WhatsApp</a>
-        </nav>
-      </div>
-
-      <div class="aa-rail-labels">
-        <span>On the rail</span>
-        <span>Allegiant Attire / Ajman &middot; UAE</span>
-      </div>
-
-      <div class="aa-rail-stage">
-        <div class="aa-rail-bar" aria-hidden="true"></div>
-        <ul class="aa-rail-track">
-          <li class="aa-rail-item" style="--i:0">
-            <a class="aa-rail-link" href="/custom-t-shirts-dubai/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/white-tee.webp" type="image/webp" />
-                    <img src="/images/rail/white-tee.jpg" width="760" height="950" loading="eager" decoding="async" alt="White oversized custom t-shirt on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">01</span>
-              <span class="aa-rail-meta"><b>Oversized T-Shirt</b><i>240 GSM combed cotton</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:1">
-            <a class="aa-rail-link" href="/activewear-manufacturer-uae/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/black-jersey.webp" type="image/webp" />
-                    <img src="/images/rail/black-jersey.jpg" width="760" height="950" loading="eager" decoding="async" alt="Black sublimated football jersey on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">02</span>
-              <span class="aa-rail-meta"><b>Sublimated Jersey</b><i>Dry-fit team kits</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:2">
-            <a class="aa-rail-link" href="/custom-polo-shirts-dubai/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/navy-polo.webp" type="image/webp" />
-                    <img src="/images/rail/navy-polo.jpg" width="760" height="950" loading="eager" decoding="async" alt="Navy pique cotton polo shirt on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">03</span>
-              <span class="aa-rail-meta"><b>Pique Polo</b><i>220-260 GSM, embroidered</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:3">
-            <a class="aa-rail-link" href="/custom-hoodies-dubai/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/grey-hoodie.webp" type="image/webp" />
-                    <img src="/images/rail/grey-hoodie.jpg" width="760" height="950" loading="eager" decoding="async" alt="Charcoal heavyweight custom hoodie on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">04</span>
-              <span class="aa-rail-meta"><b>Heavyweight Hoodie</b><i>400 GSM brushed fleece</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:4">
-            <a class="aa-rail-link" href="/private-label-clothing-uae/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/sand-sweatshirt.webp" type="image/webp" />
-                    <img src="/images/rail/sand-sweatshirt.jpg" width="760" height="950" loading="lazy" decoding="async" alt="Sand crewneck sweatshirt on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">05</span>
-              <span class="aa-rail-meta"><b>Crewneck Sweatshirt</b><i>Loopback, private label</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:5">
-            <a class="aa-rail-link" href="/office-corporate-uniforms-dubai/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/corporate-shirt.webp" type="image/webp" />
-                    <img src="/images/rail/corporate-shirt.jpg" width="760" height="950" loading="lazy" decoding="async" alt="Light blue corporate uniform shirt on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">06</span>
-              <span class="aa-rail-meta"><b>Corporate Shirt</b><i>Office and hospitality sets</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:6">
-            <a class="aa-rail-link" href="/construction-safety-uniforms-uae/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/hivis-vest.webp" type="image/webp" />
-                    <img src="/images/rail/hivis-vest.jpg" width="760" height="950" loading="lazy" decoding="async" alt="Orange hi-vis safety vest with reflective tape on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">07</span>
-              <span class="aa-rail-meta"><b>Hi-Vis Safety Vest</b><i>UAE site compliant</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:7">
-            <a class="aa-rail-link" href="/dtf-printing-dubai/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/white-tee.webp" type="image/webp" />
-                    <img src="/images/rail/white-tee.jpg" width="760" height="950" loading="lazy" decoding="async" alt="Blank white tee ready for DTF printing on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">08</span>
-              <span class="aa-rail-meta"><b>DTF Printed Tee</b><i>Same-day Dubai transfers</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:8">
-            <a class="aa-rail-link" href="/school-uniforms-uae/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/navy-polo.webp" type="image/webp" />
-                    <img src="/images/rail/navy-polo.jpg" width="760" height="950" loading="lazy" decoding="async" alt="Navy school uniform polo shirt on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">09</span>
-              <span class="aa-rail-meta"><b>School Uniform Polo</b><i>Colourfast for UAE heat</i></span>
-            </a>
-          </li>
-          <li class="aa-rail-item" style="--i:9">
-            <a class="aa-rail-link" href="/embroidery-services-dubai/">
-              <span class="aa-rail-drop">
-                <span class="aa-rail-garment">
-                  <picture>
-                    <source srcset="/images/rail/black-jersey.webp" type="image/webp" />
-                    <img src="/images/rail/black-jersey.jpg" width="760" height="950" loading="lazy" decoding="async" alt="Black jersey ready for machine embroidery on a wooden hanger — Allegiant Attire, Ajman UAE" />
-                  </picture>
-                </span>
-              </span>
-              <span class="aa-rail-no">10</span>
-              <span class="aa-rail-meta"><b>Embroidered Kit</b><i>15-colour multi-head</i></span>
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="aa-rail-foot">
-        <h2 class="aa-rail-title">Made in the UAE, with love.</h2>
-        <p class="aa-rail-hint aa-rail-hint--hover">Hover to turn. Click to explore.</p>
-        <p class="aa-rail-hint aa-rail-hint--touch">Slide the rail. Tap to explore.</p>
-        <a class="aa-rail-cta" href="#aa-storefront">
-          Explore Allegiant Attire
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v16M5 13l7 7 7-7" /></svg>
+    <div class="aa-home-shell" id="aa-home">
+      <header class="aa-site-header">
+        <button class="aa-menu-btn" type="button" data-aa-open="aa-menu-dialog" aria-haspopup="dialog">
+          <span class="aa-burger" aria-hidden="true"><i></i><i></i></span>
+          <span class="aa-label">Menu</span>
+        </button>
+        <a class="aa-brand-home" href="/" aria-label="Allegiant Attire home">
+          <span class="aa-brand-lockup">ALLEGIANT<span class="aa-brand-star" aria-hidden="true"></span>ATTIRE</span>
         </a>
-      </div>
-    </section>
+        <a class="aa-shop-link" href="#aa-storefront">
+          Shop
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 10 10 2M4 2h6v6" /></svg>
+        </a>
+      </header>
 
-    <div class="aa-mq" aria-hidden="true">
-      <div class="aa-mq-track">
-        <span>Made in the UAE, with love.</span><span class="aa-mq-dot">&#9670;</span>
-        <span>Cut, stitched &amp; printed in Ajman</span><span class="aa-mq-dot">&#9670;</span>
-        <span>MOQ from 10 pieces</span><span class="aa-mq-dot">&#9670;</span>
-        <span>Same-day DTF for Dubai</span><span class="aa-mq-dot">&#9670;</span>
-        <span>Embroidery &middot; Screen print &middot; Sublimation</span><span class="aa-mq-dot">&#9670;</span>
-      </div>
+      <main class="aa-home-main">
+        <section class="aa-rail-experience" aria-label="Allegiant Attire garment rail">
+          <div class="aa-collection-eyebrow">
+            <span>On the rail</span>
+            <span class="aa-eyebrow-divider" aria-hidden="true"></span>
+            <span>Allegiant Attire / Ajman</span>
+          </div>
+
+          <div class="aa-rail-scroll">
+            <div class="aa-rail-stage">
+              <div class="aa-metal-rail" aria-hidden="true"><span></span><span></span></div>
+              <div class="aa-garments">
+            <button class="aa-garment" type="button"
+              data-index="01" data-name="Oversized T-Shirt" data-spec="T-Shirts / 240 GSM" data-href="/custom-t-shirts-dubai/"
+              data-front="/images/rail/white-tee.webp"
+              data-copy="Heavyweight combed-cotton oversized tee, 240 GSM, wash-tested and cut in our Ajman factory. DTF, screen print or embroidery, MOQ from 10 pieces."
+              aria-haspopup="dialog" aria-label="Oversized T-Shirt — T-Shirts / 240 GSM">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/white-tee.webp" width="760" height="897" loading="eager" decoding="async"
+                       alt="Oversized T-Shirt on a wooden hanger — custom t-shirts by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">01</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="02" data-name="Sublimated Jersey" data-spec="Activewear / Dry-fit" data-href="/activewear-manufacturer-uae/"
+              data-front="/images/rail/black-jersey.webp"
+              data-copy="Full-sublimation football and training kit in breathable dry-fit polyester. Unlimited colours, club badges and numbers printed into the cloth."
+              aria-haspopup="dialog" aria-label="Sublimated Jersey — Activewear / Dry-fit">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/black-jersey.webp" width="760" height="897" loading="eager" decoding="async"
+                       alt="Sublimated Jersey on a wooden hanger — custom activewear by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">02</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="03" data-name="Hi-Vis Safety Vest" data-spec="Safety / Site kit" data-href="/construction-safety-uniforms-uae/"
+              data-front="/images/rail/hivis-vest.webp"
+              data-copy="Class-2 style hi-vis vest with silver reflective banding, built for UAE site compliance. Company branding printed or heat-sealed to order."
+              aria-haspopup="dialog" aria-label="Hi-Vis Safety Vest — Safety / Site kit">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/hivis-vest.webp" width="760" height="897" loading="eager" decoding="async"
+                       alt="Hi-Vis Safety Vest on a wooden hanger — custom safety by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">03</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="04" data-name="DTF Printed Tee" data-spec="Print / Same-day" data-href="/dtf-printing-dubai/"
+              data-front="/images/rail/white-tee.webp"
+              data-copy="Direct-to-film transfers pressed in Ajman for same-day Dubai collection. Full colour, no setup fees, from a single piece upward."
+              aria-haspopup="dialog" aria-label="DTF Printed Tee — Print / Same-day">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/white-tee.webp" width="760" height="897" loading="eager" decoding="async"
+                       alt="DTF Printed Tee on a wooden hanger — custom print by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">04</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="05" data-name="Embroidered Team Kit" data-spec="Embroidery / 15-colour" data-href="/embroidery-services-dubai/"
+              data-front="/images/rail/black-jersey.webp"
+              data-copy="Japanese multi-head embroidery up to fifteen colours — chest crests, sleeve badges and sponsor marks stitched to spec."
+              aria-haspopup="dialog" aria-label="Embroidered Team Kit — Embroidery / 15-colour">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/black-jersey.webp" width="760" height="897" loading="lazy" decoding="async"
+                       alt="Embroidered Team Kit on a wooden hanger — custom embroidery by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">05</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="06" data-name="Reflective Work Vest" data-spec="Workwear / Bulk" data-href="/construction-safety-uniforms-uae/"
+              data-front="/images/rail/hivis-vest.webp"
+              data-copy="Bulk site vests for contractors and facilities teams, size-sorted, poly-bagged and delivered across the Emirates in one to two days."
+              aria-haspopup="dialog" aria-label="Reflective Work Vest — Workwear / Bulk">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/hivis-vest.webp" width="760" height="897" loading="lazy" decoding="async"
+                       alt="Reflective Work Vest on a wooden hanger — custom workwear by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">06</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="07" data-name="Screen Printed Tee" data-spec="Print / Pantone" data-href="/screen-printing-dubai/"
+              data-front="/images/rail/white-tee.webp"
+              data-copy="Pantone-matched plastisol and water-based screen printing for runs above 100 pieces. Holds colour through fifty-plus industrial washes."
+              aria-haspopup="dialog" aria-label="Screen Printed Tee — Print / Pantone">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/white-tee.webp" width="760" height="897" loading="lazy" decoding="async"
+                       alt="Screen Printed Tee on a wooden hanger — custom print by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">07</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="08" data-name="Training Jersey" data-spec="Sportswear / Clubs" data-href="/activewear-manufacturer-uae/"
+              data-front="/images/rail/black-jersey.webp"
+              data-copy="Lightweight training tops for clubs, academies and corporate tournaments, with moisture-wicking mesh panels where the heat sits."
+              aria-haspopup="dialog" aria-label="Training Jersey — Sportswear / Clubs">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/black-jersey.webp" width="760" height="897" loading="lazy" decoding="async"
+                       alt="Training Jersey on a wooden hanger — custom sportswear by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">08</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="09" data-name="Traffic Vest" data-spec="Safety / Compliance" data-href="/construction-safety-uniforms-uae/"
+              data-front="/images/rail/hivis-vest.webp"
+              data-copy="High-visibility traffic and marshal vests in orange or yellow, reflective taped, stocked and branded for fleets and events."
+              aria-haspopup="dialog" aria-label="Traffic Vest — Safety / Compliance">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/hivis-vest.webp" width="760" height="897" loading="lazy" decoding="async"
+                       alt="Traffic Vest on a wooden hanger — custom safety by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">09</span>
+            </button>
+            <button class="aa-garment" type="button"
+              data-index="10" data-name="Private Label Tee" data-spec="Private label / Full package" data-href="/private-label-clothing-uae/"
+              data-front="/images/rail/white-tee.webp"
+              data-copy="Your brand, our factory: woven neck labels, hang tags, size chips and retail packaging on a blank cut to your tech pack."
+              aria-haspopup="dialog" aria-label="Private Label Tee — Private label / Full package">
+              <span class="aa-hanger-wire" aria-hidden="true"></span>
+              <span class="aa-garment-swing">
+                <span class="aa-garment-turn">
+                  <img src="/images/rail/white-tee.webp" width="760" height="897" loading="lazy" decoding="async"
+                       alt="Private Label Tee on a wooden hanger — custom private label by Allegiant Attire, Ajman UAE" />
+                </span>
+              </span>
+              <span class="aa-garment-index">10</span>
+            </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="aa-rail-caption">
+            <p class="aa-caption-title">Made in the UAE, with love.</p>
+            <div class="aa-rail-hints">
+              <p class="aa-desktop-hint">Hover to turn. Click to explore.</p>
+              <p class="aa-mobile-hint">Slide the rail. Tap to explore.</p>
+            </div>
+            <a class="aa-explore-button" href="#aa-storefront">
+              Explore Allegiant Attire
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 1v10M2 7l4 4 4-4" /></svg>
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="aa-site-footer">
+        <div class="aa-brand-marquee" aria-hidden="true">
+          <div class="aa-marquee-track">
+          <div class="aa-marquee-group">
+            <span>Made in the UAE, with love.</span><span class="aa-marquee-star" aria-hidden="true"></span>
+            <span>Cut, stitched &amp; printed in Ajman</span><span class="aa-marquee-star" aria-hidden="true"></span>
+            <span>MOQ from 10 pieces</span><span class="aa-marquee-star" aria-hidden="true"></span>
+            <span>Same-day DTF for Dubai</span><span class="aa-marquee-star" aria-hidden="true"></span>
+          </div>
+          <div class="aa-marquee-group">
+            <span>Made in the UAE, with love.</span><span class="aa-marquee-star" aria-hidden="true"></span>
+            <span>Cut, stitched &amp; printed in Ajman</span><span class="aa-marquee-star" aria-hidden="true"></span>
+            <span>MOQ from 10 pieces</span><span class="aa-marquee-star" aria-hidden="true"></span>
+            <span>Same-day DTF for Dubai</span><span class="aa-marquee-star" aria-hidden="true"></span>
+          </div>
+          </div>
+        </div>
+        <div class="aa-footer-bottom">
+          <span>Industrial by nature. Emirati at heart.</span>
+          <button type="button" data-aa-open="aa-about-dialog" aria-haspopup="dialog">About Allegiant Attire &rarr;</button>
+        </div>
+      </footer>
     </div>
 
-    <section class="aa-rail-outro" aria-label="About Allegiant Attire">
-      <p>Industrial by nature. Emirati at heart.</p>
-      <div class="aa-rail-outro-links">
-        <a href="/about-us/">Inside the factory</a>
-        <a href="/contact/">Request a bulk quote</a>
+    <dialog id="aa-garment-dialog" class="aa-dialog aa-garment-dialog" aria-label="Garment details">
+      <button class="aa-dialog-close" type="button" data-aa-close aria-label="Close">&#10005;</button>
+      <div class="aa-detail-topline">
+        <span class="aa-detail-kind">T-Shirts / 240 GSM</span>
+        <span>Allegiant Attire / Ajman</span>
       </div>
-    </section>
+      <div class="aa-detail-artwork">
+        <button class="aa-detail-prev" type="button" aria-label="Previous garment">&#8249;</button>
+        <div class="aa-detail-turntable">
+          <div class="aa-detail-face aa-detail-front">
+            <img src="/images/rail/white-tee.webp" width="760" height="897" loading="lazy" decoding="async" alt="Allegiant Attire garment, front view" />
+          </div>
+          <div class="aa-detail-face aa-detail-back">
+            <img src="/images/rail/white-tee.webp" width="760" height="897" loading="lazy" decoding="async" alt="Allegiant Attire garment, back view" />
+          </div>
+        </div>
+        <button class="aa-detail-next" type="button" aria-label="Next garment">&#8250;</button>
+      </div>
+      <div class="aa-detail-info">
+        <span class="aa-detail-count">01 / 10</span>
+        <h2 class="aa-detail-title">Oversized T-Shirt</h2>
+        <div class="aa-view-controls" hidden>
+          <button type="button" class="selected">Front</button>
+          <button type="button">Back</button>
+        </div>
+        <p class="aa-detail-description"></p>
+        <div class="aa-detail-bottom">
+          <span>MOQ from 10 pcs &middot; made in Ajman</span>
+          <a class="aa-detail-page" href="/custom-t-shirts-dubai/">View this product &rarr;</a>
+          <a href="https://wa.me/971582045242" rel="nofollow">WhatsApp a quote &rarr;</a>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="aa-menu-dialog" class="aa-dialog aa-menu-dialog" aria-label="Menu">
+      <div class="aa-menu-top">
+        <span class="aa-brand-lockup">ALLEGIANT<span class="aa-brand-star" aria-hidden="true"></span>ATTIRE</span>
+        <button class="aa-dialog-close" type="button" data-aa-close aria-label="Close">&#10005;</button>
+      </div>
+      <nav class="aa-menu-links" aria-label="Main">
+        <a href="#aa-storefront"><span>Shop<small>Browse the catalogue</small></span><span>&rarr;</span></a>
+        <a href="/custom-t-shirts-dubai/"><span>T-Shirts<small>From 10 pcs</small></span><span>&rarr;</span></a>
+        <a href="/custom-hoodies-dubai/"><span>Hoodies<small>400 GSM fleece</small></span><span>&rarr;</span></a>
+        <a href="/office-corporate-uniforms-dubai/"><span>Uniforms<small>Office &amp; hospitality</small></span><span>&rarr;</span></a>
+        <a href="/dtf-printing-dubai/"><span>Printing<small>Same-day DTF</small></span><span>&rarr;</span></a>
+        <a href="/contact/"><span>Contact<small>Request a quote</small></span><span>&rarr;</span></a>
+      </nav>
+      <div class="aa-menu-address">
+        <span>Factory</span>
+        <p>New Industrial Area 2<br />Ajman, United Arab Emirates</p>
+        <a href="tel:+971582045242">+971 58 204 5242 &rarr;</a>
+      </div>
+      <p class="aa-menu-signoff">Made in the UAE, with love.</p>
+    </dialog>
+
+    <dialog id="aa-about-dialog" class="aa-dialog aa-about-dialog" aria-label="About Allegiant Attire">
+      <button class="aa-dialog-close" type="button" data-aa-close aria-label="Close">&#10005;</button>
+      <div>
+        <p class="aa-about-eyebrow">About</p>
+        <h2 class="aa-about-title">Industrial by nature.</h2>
+        <p class="aa-about-description">Allegiant Attire is a cut-and-sew clothing factory in New Industrial Area 2, Ajman — cutting, stitching, printing and embroidering for businesses across the UAE.</p>
+      </div>
+      <p class="aa-about-copy">Everything on the rail is made in-house: DTF, screen printing, sublimation and multi-head embroidery under one roof, with minimums from ten pieces and delivery across Dubai, Sharjah and Abu Dhabi in one to two days.</p>
+      <a class="aa-about-shop" href="#aa-storefront">Browse the shop &rarr;</a>
+      <p class="aa-about-location">Ajman &middot; Dubai &middot; Sharjah &middot; Abu Dhabi</p>
+    </dialog>
 
     <div id="aa-storefront"></div>
     <div id="root">
