@@ -191,8 +191,39 @@
       });
     });
 
+    /* ---------- hold the motion until the band is on screen ---------- */
+    revealOnScroll(shell, function () {
+      if (!finePointer || active !== -1) return;
+      /* one unprompted turn after the garments have dropped in, so the
+         "hover to turn" invitation is demonstrated rather than stated */
+      window.setTimeout(function () {
+        if (active !== -1) return;
+        activate(Math.min(4, garments.length - 1));
+        window.setTimeout(function () { if (active === Math.min(4, garments.length - 1)) activate(-1); }, 1400);
+      }, 1500);
+    });
+
     /* ---------- lift the rail into the storefront ---------- */
     placeRail(shell);
+  }
+
+  /* The drop-in and the idle sway are paused in CSS until .is-in-view
+     lands on the shell, so the rail animates in when the reader
+     reaches it, not while it is still hidden at the top of the page. */
+  function revealOnScroll(shell, done) {
+    function go() {
+      if (shell.classList.contains("is-in-view")) return;
+      shell.classList.add("is-in-view");
+      if (done) done();
+    }
+    if (!("IntersectionObserver" in window)) return go();
+    var io = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { io.disconnect(); go(); }
+    }, { threshold: 0.25 });
+    io.observe(shell);
+    // never leave the garments stuck at opacity 0 if the observer
+    // somehow never reports the band as visible
+    window.setTimeout(function () { io.disconnect(); go(); }, 9000);
   }
 
   /* The rail is authored in the page source (so it is in the HTML a

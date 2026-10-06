@@ -247,6 +247,15 @@ body.dark-mono .aa-dialog {
 
 .aa-garment.is-active .aa-garment-swing { animation-play-state: running, paused; }
 
+/* The band sits well below the fold, so hold the drop-in and the idle
+   sway until it is actually on screen — otherwise every bit of
+   entrance motion is spent while nobody is looking at it. Pausing
+   during the delay keeps each garment at its 0% keyframe, so the
+   stagger replays intact the moment the rail scrolls into view. */
+.aa-home-shell:not(.is-in-view) .aa-garment-swing {
+  animation-play-state: paused, paused;
+}
+
 /* The same single hover state in pure CSS, so the rail reacts on the
    very first hover — before, or entirely without, the script. */
 @media (hover: hover) and (pointer: fine) {
