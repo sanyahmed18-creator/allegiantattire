@@ -11,6 +11,17 @@
 - **Client-side admin fallback.** Bundled default passwords and the optional browser-only login fallback now fail closed. The site has no trusted server-side CMS/authentication unless you separately configure one; `localStorage` edits affect only that browser. Do not treat the public admin UI as access control.
 - **Host headers.** `.htaccess` contains a restrictive baseline policy that permits the site’s Google tag, Cloudflare Insights, and Google Fonts. It only applies on a compatible Apache host that allows these directives. If the site is served by GitHub Pages or another static host, configure equivalent headers/redirects at that host or Cloudflare instead.
 
+## Homepage hero — "On the rail"
+
+The homepage opens with a full-viewport garment rail before the storefront loads.
+
+- `home-hero.css` / `home-hero.js` — styles and behaviour, namespaced `.aa-rail*` / `.aa-mq*` so nothing collides with the React bundle or `custom.css`.
+- Markup lives in `index.html` **outside** `#root`, so a React re-render can never wipe it. `<div id="aa-storefront"></div>` marks the scroll target used by the hero's *Shop* and *Explore* links.
+- `images/rail/*.webp|jpg` — ten hangers drawn from seven garment photographs (760 × 950). Their studio background is colour-matched to the hero's `--aa-bone` (`#e8e4de`) and the edges are feathered with a CSS mask, which is why the field behind the rail must stay a flat colour: any gradient, filter or drop-shadow there outlines each photograph.
+- Desktop hovers lift and turn a garment while its neighbours step aside; touch devices scroll-snap the rail and light whatever sits in the middle. Everything collapses gracefully with `prefers-reduced-motion` and still works with JavaScript disabled.
+
+To change a garment, replace the file in `images/rail/` and edit the matching `<li class="aa-rail-item">` in `index.html` (keep `alt`, `width` and `height` — the SEO validator requires them).
+
 ## Run the deployment checks
 
 From the repository root:
