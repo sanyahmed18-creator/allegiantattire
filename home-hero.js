@@ -47,10 +47,46 @@
       caption.style.animation = "";
     }
 
-    function activate(index) {
-      garments.forEach(function (el, i) {
-        el.classList.toggle("is-active", i === index);
+    /* A hanger that is brushed past swings, overshoots and settles.
+       `dir` is the direction the pointer was travelling (-1 / +1) and
+       `force` scales the first swing, so a quick sweep across the rail
+       disturbs the clothes more than a slow one. */
+    function kick(el, dir, force) {
+      if (reduced) return;
+      var swing = el.querySelector(".aa-garment-swing");
+      if (!swing) return;
+      swing.style.setProperty("--kick", (dir * force).toFixed(2));
+      swing.classList.remove("is-kick");
+      void swing.offsetWidth;                 // restart the animation
+      swing.classList.add("is-kick");
+    }
+
+    garments.forEach(function (el) {
+      var swing = el.querySelector(".aa-garment-swing");
+      if (!swing) return;
+      swing.addEventListener("animationend", function (e) {
+        if (e.animationName === "aa-swing-kick") swing.classList.remove("is-kick");
       });
+    });
+
+    var active = -1;
+    var pointerX = null;
+    var pointerDir = 1;
+    var lastMove = 0;
+    var speed = 0;
+
+    function activate(index, swung) {
+      if (index === active) return;
+      var previous = active;
+      active = index;
+
+      garments.forEach(function (el, i) {
+        var d = index === -1 ? 99 : Math.abs(i - index);
+        el.classList.toggle("is-active", d === 0);
+        el.classList.toggle("is-near", d === 1);
+        el.classList.toggle("is-far", d === 2);
+      });
+
       if (index === -1) {
         setCaption(captionDefault);
         if (hintWrap) hintWrap.classList.remove("is-detail");
@@ -63,15 +99,49 @@
         );
         if (hintWrap) hintWrap.classList.add("is-detail");
       }
+
+      if (swung === false) return;
+
+      /* the piece you reached, its neighbours, and the one you just
+         left all take a knock — strongest at the point of contact */
+      var force = Math.min(3.2, 1 + speed * 1.2);
+      if (index !== -1) {
+        kick(garments[index], pointerDir, force * 0.85);
+        if (garments[index - 1]) kick(garments[index - 1], pointerDir, force * 0.5);
+        if (garments[index + 1]) kick(garments[index + 1], pointerDir, force * 0.5);
+      }
+      if (previous !== -1 && garments[previous] && Math.abs(previous - index) > 1) {
+        kick(garments[previous], -pointerDir, force * 0.4);
+      }
     }
 
     if (finePointer) {
+      var stage = shell.querySelector(".aa-garments");
+
+      if (stage) {
+        stage.addEventListener("pointermove", function (e) {
+          var now = e.timeStamp || Date.now();
+          if (pointerX !== null) {
+            var dx = e.clientX - pointerX;
+            var dt = Math.max(16, now - lastMove);
+            if (Math.abs(dx) > 0.5) pointerDir = dx > 0 ? 1 : -1;
+            speed = speed * 0.6 + Math.abs(dx / dt) * 0.4;        // px per ms, smoothed
+          }
+          pointerX = e.clientX;
+          lastMove = now;
+        }, { passive: true });
+
+        stage.addEventListener("pointerleave", function () {
+          activate(-1);
+          pointerX = null;
+          speed = 0;
+        });
+      }
+
       garments.forEach(function (el, i) {
         el.addEventListener("pointerenter", function () { activate(i); });
         el.addEventListener("focus", function () { activate(i); });
       });
-      var stage = shell.querySelector(".aa-garments");
-      if (stage) stage.addEventListener("pointerleave", function () { activate(-1); });
     }
 
     /* ---------- touch: the centred garment is the active one ---------- */
