@@ -17,15 +17,10 @@
   --aa-grid: #0a0a0a12;
   --aa-shadow: rgba(128, 128, 128, 0.6);
 
-  /* Rail geometry. The stage is a fixed width and the ten slots share
-     it equally, so an idle slot is always WIDER than the edge-on
-     garment standing in it — no garment can hide behind a neighbour —
-     and opening one garment only redistributes space inside the same
-     stage, never resizes or re-scrolls the rail. */
-  --aa-stage-w: clamp(580px, 92vw, 1120px);
-  --aa-stage-h: clamp(196px, 34svh, 330px);
-  --aa-garment-w: clamp(142px, 17vw, 216px);
-  --aa-gap: clamp(2px, 0.5vw, 8px);
+  /* Rail geometry and motion: every value below is the reference
+     build's own — stage, insets, garment box, angles, easing, shares
+     and delays — and the garment images were re-canvassed to its
+     640x900 proportion so they render identically. */
 
   /* Motion, ported verbatim from the reference build: the rest angle,
      the share of the stage an open garment takes, the easing curve and
@@ -247,64 +242,52 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 /* --- the rail itself --- */
 .aa-rail-scroll {
-  display: flex;
-  justify-content: safe center;
   width: 100%;
   margin-top: clamp(16px, 3svh, 34px);
-  padding: 6px clamp(16px, 4vw, 44px) 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
 }
 
 .aa-rail-scroll::-webkit-scrollbar { display: none; }
 
 .aa-rail-stage {
   position: relative;
-  flex: 0 0 var(--aa-stage-w);
-  width: var(--aa-stage-w);
-  padding-top: 10px;
-  height: calc(var(--aa-stage-h) + 10px);
+  width: min(1100px, 84vw);
+  height: clamp(285px, 29vw, 365px);
+  margin: 0 auto;
 }
 
 .aa-metal-rail {
   position: absolute;
-  top: 10px;
+  top: 0;
   left: 0;
-  right: 0;
+  width: 100%;
   height: 4px;
   background: var(--aa-line);
 }
 
 .aa-metal-rail > span {
   position: absolute;
-  top: -8px;
+  top: -9px;
   width: 4px;
-  height: 20px;
+  height: 22px;
   background: var(--aa-line);
 }
 
-.aa-metal-rail > span:first-child { left: 0; }
-.aa-metal-rail > span:last-child { right: 0; }
+.aa-metal-rail > span:first-child { left: -4px; }
+.aa-metal-rail > span:last-child { right: -4px; }
 
 .aa-garments {
-  position: relative;
+  position: absolute;
+  inset: 0 30px;
   display: flex;
   align-items: flex-start;
-  gap: var(--aa-gap);
-  height: var(--aa-stage-h);
 }
 
 .aa-garment {
   position: relative;
-  flex: 1 1 0;
+  flex: 1;
   min-width: 0;
   height: 100%;
   perspective: 900px;
-  scroll-snap-align: center;
-  z-index: 1;
   outline-offset: 0 !important;
   transition: flex-grow 0.75s var(--aa-ease);
 }
@@ -313,21 +296,21 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 .aa-hanger-wire {
   position: absolute;
-  top: 2px;
+  top: 4px;
   left: calc(50% - 1px);
   width: 2px;
-  height: 26px;
+  height: 31px;
   background: var(--aa-line);
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .aa-garment-swing {
   position: absolute;
-  top: 24px;
+  top: 30px;
   left: 50%;
-  width: var(--aa-garment-w);
-  margin-left: calc(var(--aa-garment-w) / -2);
-  height: calc(100% - 44px);
+  width: clamp(200px, 24vw, 286px);
+  margin-left: clamp(-143px, -12vw, -100px);
+  height: calc(100% - 42px);
   --arrival: 0ms;
   --sway: 0s;
   transform-origin: 50% 0;
@@ -358,7 +341,7 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 .aa-garment-index {
   position: absolute;
-  bottom: 0;
+  bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
   padding: 2px 5px;
@@ -366,8 +349,13 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   font-size: 9px;
   font-weight: 500;
   color: var(--aa-muted-fg);
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  opacity: 0;
+  transition: opacity 0.25s;
 }
+
+.aa-garment.is-active .aa-garment-index,
+.aa-garment:hover .aa-garment-index,
+.aa-garment:focus-visible .aa-garment-index { opacity: 1; }
 
 /* --- active garment: faces you, the rail accordions open --- */
 .aa-garment.is-active {
@@ -389,8 +377,6 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   color: var(--aa-bg);
 }
 
-/* CSS-only mirror of the same state, so the rail still turns on hover
-   even before (or without) the script */
 /* The same single hover state in pure CSS, so the rail reacts on the
    very first hover — before, or entirely without, the script. */
 @media (hover: hover) and (pointer: fine) {
@@ -846,25 +832,35 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
 @keyframes aa-caption-in { 0% { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ---------------- breakpoints ---------------- */
+@media (min-width: 1600px) {
+  .aa-rail-stage { width: 1250px; height: 400px; }
+  .aa-garment-swing { width: 315px; margin-left: -157.5px; }
+}
+
 @media (max-width: 900px) {
-  .aa-home-shell {
-    --aa-garment-w: clamp(128px, 17.5vw, 180px);
-    --aa-turn-rest: -74deg;
-    --aa-grow: 3.6;
-  }
+  .aa-home-shell { --aa-turn-rest: -74deg; --aa-grow: 3.6; }
+  .aa-rail-stage { width: 89vw; height: 300px; }
+  .aa-garments { inset-inline: 20px; }
+  .aa-garment-swing { width: 218px; margin-left: -109px; }
   .aa-brand-home img { height: 34px; }
   .aa-menu-btn .aa-label { display: none; }
   .aa-menu-btn, .aa-shop-link { height: 38px; padding: 0 13px; }
 }
 
 @media (max-width: 600px) {
-  .aa-home-shell {
-    --aa-garment-w: 130px;
-    --aa-stage-h: clamp(190px, 30svh, 250px);
-    --aa-gap: 2px;
-    --aa-grow: 2.8;
-    --aa-turn-rest: -68deg;
+  .aa-home-shell { --aa-turn-rest: -65deg; --aa-grow: 2.8; }
+
+  .aa-rail-scroll {
+    padding: 12px 26px 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
+
+  .aa-rail-scroll::-webkit-scrollbar { display: none; }
+  .aa-rail-stage { width: 790px; height: 288px; margin: 0; }
+  .aa-garments { inset-inline: 15px; }
+  .aa-garment-swing { width: 220px; margin-left: -110px; }
 
   .aa-site-header { padding: 11px 14px; }
   .aa-brand-sub { letter-spacing: 0.2em; font-size: 8px; }

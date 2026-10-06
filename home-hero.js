@@ -61,12 +61,7 @@
         setCaption(captionDefault);
         if (hintWrap) hintWrap.classList.remove("is-detail");
       } else {
-        var g = garments[index].dataset;
-        setCaption(
-          (g.index ? g.index + " \u2014 " : "") +
-          (g.name || "") +
-          (g.spec ? " \u00b7 " + g.spec : "")
-        );
+        setCaption(garments[index].dataset.name || captionDefault);
         if (hintWrap) hintWrap.classList.add("is-detail");
       }
     }
@@ -107,17 +102,6 @@
       }, { passive: true });
       window.addEventListener("resize", centreScan);
       window.setTimeout(centreScan, 80);
-    }
-
-    /* ---------- the rail starts centred when it is wider than the screen ---------- */
-    if (scroller) {
-      var centreRail = function () {
-        var over = scroller.scrollWidth - scroller.clientWidth;
-        if (over > 0 && scroller.scrollLeft === 0) scroller.scrollLeft = over / 2;
-      };
-      centreRail();
-      window.setTimeout(centreRail, 60);
-      window.addEventListener("load", centreRail);
     }
 
     /* ---------- garment dialog ---------- */
