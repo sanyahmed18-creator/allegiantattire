@@ -145,9 +145,9 @@
     <script type="module" crossorigin src="/assets/index-CAFUB5Vv.js?v=15"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BtfB1ydO.css?v=4">
     <link rel="stylesheet" href="/custom.css?v=17">
-    <link rel="stylesheet" href="/home-hero.css?v=1">
+    <link rel="stylesheet" href="/home-hero.css?v=2">
     <script src="/custom.js?v=28" defer></script>
-    <script src="/home-hero.js?v=1" defer></script>
+    <script src="/home-hero.js?v=2" defer></script>
   </head>
   <body>
     <!-- ============================================================
@@ -157,26 +157,34 @@
          ============================================================ -->
     <div class="aa-home-shell" id="aa-home">
       <header class="aa-site-header">
-        <button class="aa-menu-btn" type="button" data-aa-open="aa-menu-dialog" aria-haspopup="dialog">
-          <span class="aa-burger" aria-hidden="true"><i></i><i></i></span>
-          <span class="aa-label">Menu</span>
-        </button>
         <a class="aa-brand-home" href="/" aria-label="Allegiant Attire home">
-          <span class="aa-brand-lockup">ALLEGIANT<span class="aa-brand-star" aria-hidden="true"></span>ATTIRE</span>
+          <img src="/images/brand-mark-184.webp" width="184" height="83" alt="Allegiant Attire logo" />
+          <span class="aa-brand-text">
+            <span class="aa-brand-lockup">Allegiant Attire</span>
+            <span class="aa-brand-sub">Mono &middot; Ajman &middot; Est. 2016</span>
+          </span>
         </a>
-        <a class="aa-shop-link" href="#aa-storefront">
-          Shop
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 10 10 2M4 2h6v6" /></svg>
-        </a>
+        <div class="aa-header-actions">
+          <button class="aa-menu-btn" type="button" data-aa-open="aa-menu-dialog" aria-haspopup="dialog">
+            <span class="aa-burger" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="aa-label">Menu</span>
+          </button>
+          <a class="aa-shop-link" href="#aa-storefront">
+            Shop
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 1v10M2 7l4 4 4-4" /></svg>
+          </a>
+        </div>
       </header>
 
       <main class="aa-home-main">
         <section class="aa-rail-experience" aria-label="Allegiant Attire garment rail">
           <div class="aa-collection-eyebrow">
-            <span>On the rail</span>
-            <span class="aa-eyebrow-divider" aria-hidden="true"></span>
-            <span>Allegiant Attire / Ajman</span>
+            <span class="aa-chip">N&deg;00 &mdash; On the rail</span>
+            <span class="aa-chip aa-chip-solid">In-house DTF &middot; Same-day</span>
+            <span class="aa-chip aa-chip-ghost">Dubai / Sharjah / Abu Dhabi</span>
           </div>
+
+          <h2 class="aa-hero-title">Made in the UAE, <span class="aa-boxed">with love.</span></h2>
 
           <div class="aa-rail-scroll">
             <div class="aa-rail-stage">
@@ -336,15 +344,21 @@
           </div>
 
           <div class="aa-rail-caption">
-            <p class="aa-caption-title">Made in the UAE, with love.</p>
+            <p class="aa-caption-title">Ten pieces &middot; cut, stitched &amp; printed in Ajman</p>
             <div class="aa-rail-hints">
-              <p class="aa-desktop-hint">Hover to turn. Click to explore.</p>
-              <p class="aa-mobile-hint">Slide the rail. Tap to explore.</p>
+              <p class="aa-desktop-hint">Hover to turn &middot; click to explore</p>
+              <p class="aa-mobile-hint">Slide the rail &middot; tap to explore</p>
             </div>
-            <a class="aa-explore-button" href="#aa-storefront">
-              Explore Allegiant Attire
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 1v10M2 7l4 4 4-4" /></svg>
-            </a>
+            <div class="aa-hero-actions">
+              <a class="aa-btn aa-btn-solid" href="#aa-storefront">
+                Explore the shop
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 1v10M2 7l4 4 4-4" /></svg>
+              </a>
+              <a class="aa-btn aa-btn-ghost" href="https://wa.me/971582045242" rel="nofollow">
+                WhatsApp a quote
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 10 10 2M4 2h6v6" /></svg>
+              </a>
+            </div>
           </div>
         </section>
       </main>
@@ -409,7 +423,7 @@
 
     <dialog id="aa-menu-dialog" class="aa-dialog aa-menu-dialog" aria-label="Menu">
       <div class="aa-menu-top">
-        <span class="aa-brand-lockup">ALLEGIANT<span class="aa-brand-star" aria-hidden="true"></span>ATTIRE</span>
+        <span class="aa-brand-lockup">Allegiant Attire</span>
         <button class="aa-dialog-close" type="button" data-aa-close aria-label="Close">&#10005;</button>
       </div>
       <nav class="aa-menu-links" aria-label="Main">
