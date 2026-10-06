@@ -8,7 +8,7 @@
      • touch: the rail scrolls horizontally and whatever sits nearest
        the middle becomes active
      • click/Enter: opens the garment dialog (turntable + details)
-     • finally, the band is moved under the storefront hero
+     • finally, the band is moved inside the storefront hero
 
    Authored outside #root, so React hydration cannot wipe it.
    ============================================================ */
@@ -234,29 +234,31 @@
   }
 
   /* The rail is authored in the page source (so it is in the HTML a
-     crawler sees) but it belongs further down the page, directly under
-     the storefront's hero, just above the running marquee. React paints
-     that marquee after us, so watch for it, then move the band into
-     place and reveal it.
-     Moving a node keeps its listeners, so the rail is live either way. */
+     crawler sees) but it belongs inside the storefront hero, in the
+     gap between the headline and the paragraph under it. React paints
+     that hero after us, so watch for it, then move the band into place
+     and reveal it. Moving a node keeps its listeners, so the rail is
+     live either way. */
   function placeRail(shell) {
+    var HEADLINE = '#root [data-source-loc="src/App.tsx:217:14"]';   // the big hero headline
+    var LEDE = '#root [data-source-loc="src/App.tsx:222:14"]';       // "Blank & custom apparel ..."
     var MARQUEE = '#root [data-source-loc="src/components/ui.tsx:27:4"]';
-    var CATEGORIES = '#root [data-source-loc="src/App.tsx:271:6"]';
     var anchor = null;
 
     function seat() {
-      var marquee = document.querySelector(MARQUEE);
-      if (marquee && marquee.parentNode) {
-        if (shell.nextElementSibling !== marquee) {
-          marquee.parentNode.insertBefore(shell, marquee);
+      var headline = document.querySelector(HEADLINE);
+      if (headline && headline.parentNode) {
+        if (headline.nextElementSibling !== shell) {
+          headline.parentNode.insertBefore(shell, headline.nextSibling);
         }
-        anchor = marquee;
+        anchor = headline;
         shell.hidden = false;
         return true;
       }
-      var categories = document.querySelector(CATEGORIES);
-      if (categories && categories.parentNode) {
-        categories.parentNode.insertBefore(shell, categories);
+      // the headline is the one we want; these only catch a rebuilt hero
+      var after = document.querySelector(LEDE) || document.querySelector(MARQUEE);
+      if (after && after.parentNode) {
+        after.parentNode.insertBefore(shell, after);
         shell.hidden = false;
         return true;
       }
@@ -281,13 +283,13 @@
     keepSeated();
 
     /* a React re-render can shuffle its own children around ours, so
-       check a few times that the rail is still under the marquee */
+       check a few times that the rail is still under the headline */
     function keepSeated() {
       var checks = 0;
       var timer = window.setInterval(function () {
         if (++checks > 10) return window.clearInterval(timer);
-        if (anchor && anchor.parentNode && shell.nextElementSibling !== anchor) {
-          anchor.parentNode.insertBefore(shell, anchor);
+        if (anchor && anchor.parentNode && anchor.nextElementSibling !== shell) {
+          anchor.parentNode.insertBefore(shell, anchor.nextSibling);
         }
       }, 700);
     }

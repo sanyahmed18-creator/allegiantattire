@@ -37,12 +37,6 @@
   position: relative;
   z-index: 1;
   display: block;
-  border-top: 2px solid var(--aa-line);
-  background-color: var(--aa-bg);
-  background-image:
-    linear-gradient(90deg, var(--aa-grid) 1px, transparent 1px),
-    linear-gradient(var(--aa-grid) 1px, transparent 1px);
-  background-size: 44px 44px;
   color: var(--aa-fg);
   font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
   line-height: 1.5;
@@ -110,10 +104,16 @@ body.dark-mono .aa-dialog {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(30px, 4vw, 56px) 0 clamp(26px, 3.4vw, 44px);
+  padding: 18px 0 2px;
 }
 
-.aa-rail-experience { width: 100%; }
+/* The rail is sized against its own column, not the viewport, because
+   it is dropped inside the hero's seven-column text block — cqw keeps
+   the reference's proportions whatever width that column ends up. */
+.aa-rail-experience {
+  width: 100%;
+  container-type: inline-size;
+}
 
 /* --- the rail itself --- */
 .aa-rail-scroll { width: 100%; }
@@ -122,8 +122,10 @@ body.dark-mono .aa-dialog {
 
 .aa-rail-stage {
   position: relative;
-  width: min(1100px, 84vw);
-  height: clamp(285px, 29vw, 365px);
+  width: 100%;
+  max-width: 1100px;
+  height: clamp(215px, 29vw, 365px);   /* fallback where cqw is unsupported */
+  height: clamp(215px, 34cqw, 365px);
   margin: 0 auto;
 }
 
@@ -155,7 +157,7 @@ body.dark-mono .aa-dialog {
 
 .aa-garments {
   position: absolute;
-  inset: 0 30px;
+  inset: 0 clamp(12px, 3cqw, 30px);
   display: flex;
   align-items: flex-start;
 }
@@ -187,6 +189,8 @@ body.dark-mono .aa-dialog {
   left: 50%;
   width: clamp(200px, 24vw, 286px);
   margin-left: clamp(-143px, -12vw, -100px);
+  width: clamp(132px, 26cqw, 286px);
+  margin-left: calc(clamp(132px, 26cqw, 286px) / -2);
   height: calc(100% - 42px);
   --arrival: 0ms;
   --sway: 0s;
@@ -284,7 +288,7 @@ body.dark-mono .aa-dialog {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 30px;
+  margin-top: 16px;
   padding: 0 clamp(16px, 4vw, 44px);
   text-align: center;
 }
