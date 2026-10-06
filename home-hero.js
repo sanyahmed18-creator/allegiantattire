@@ -1,5 +1,5 @@
 /* ============================================================
-   Allegiant Attire — "On the rail" homepage behaviour
+   Allegiant Attire — "On the rail" behaviour
 
    Mirrors the reference interaction model:
      • pointer devices: hovering/focusing a garment makes it the active
@@ -8,9 +8,9 @@
      • touch: the rail scrolls horizontally and whatever sits nearest
        the middle becomes active
      • click/Enter: opens the garment dialog (turntable + details)
-     • menu + about dialogs, marquee, reduced-motion fallbacks
+     • finally, the band is moved into the storefront, under the marquee
 
-   Lives outside #root, so React hydration cannot wipe it.
+   Authored outside #root, so React hydration cannot wipe it.
    ============================================================ */
 (function () {
   "use strict";
@@ -28,7 +28,6 @@
     if (!garments.length) return;
 
     var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     /* ---------- staggered arrival + idle sway, as in the reference ---------- */
     garments.forEach(function (el, i) {
@@ -182,14 +181,7 @@
       });
     }
 
-    /* ---------- menu + about dialogs, close buttons, backdrop clicks ---------- */
-    document.querySelectorAll("[data-aa-open]").forEach(function (trigger) {
-      trigger.addEventListener("click", function () {
-        var target = document.getElementById(trigger.getAttribute("data-aa-open"));
-        openDialog(target);
-      });
-    });
-
+    /* ---------- close buttons and backdrop clicks ---------- */
     document.querySelectorAll(".aa-dialog").forEach(function (d) {
       d.querySelectorAll("[data-aa-close]").forEach(function (b) {
         b.addEventListener("click", function () { d.close(); });
@@ -199,29 +191,67 @@
       });
     });
 
-    /* ---------- marquee: the track is two identical halves ---------- */
-    var track = shell.querySelector(".aa-marquee-track");
-    if (track && !reduced) {
-      var group = track.querySelector(".aa-marquee-group");
-      if (group) {
-        var guard = 0;
-        while (track.scrollWidth < window.innerWidth * 2 && guard < 6) {
-          track.appendChild(group.cloneNode(true));
-          track.appendChild(group.cloneNode(true));
-          guard++;
+    /* ---------- lift the rail into the storefront ---------- */
+    placeRail(shell);
+  }
+
+  /* The rail is authored in the page source (so it is in the HTML a
+     crawler sees) but it belongs further down the page, directly under
+     the storefront's running marquee. React paints that marquee after
+     us, so watch for it, then move the band into place and reveal it.
+     Moving a node keeps its listeners, so the rail is live either way. */
+  function placeRail(shell) {
+    var MARQUEE = '#root [data-source-loc="src/components/ui.tsx:27:4"]';
+    var CATEGORIES = '#root [data-source-loc="src/App.tsx:271:6"]';
+    var anchor = null;
+
+    function seat() {
+      var marquee = document.querySelector(MARQUEE);
+      if (marquee && marquee.parentNode) {
+        if (shell.previousElementSibling !== marquee) {
+          marquee.parentNode.insertBefore(shell, marquee.nextSibling);
         }
+        anchor = marquee;
+        shell.hidden = false;
+        return true;
       }
+      var categories = document.querySelector(CATEGORIES);
+      if (categories && categories.parentNode) {
+        categories.parentNode.insertBefore(shell, categories);
+        shell.hidden = false;
+        return true;
+      }
+      return false;
     }
 
-    /* ---------- smooth scroll into the storefront ---------- */
-    shell.addEventListener("click", function (e) {
-      var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
-      if (!link) return;
-      var target = document.getElementById(link.getAttribute("href").slice(1));
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
-    });
+    if (!seat()) {
+      var observer = new MutationObserver(function () {
+        if (seat()) { observer.disconnect(); keepSeated(); }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // if the storefront never paints, show the rail at the end rather
+      // than leave it hidden for good
+      window.setTimeout(function () {
+        observer.disconnect();
+        if (shell.hidden) { document.body.appendChild(shell); shell.hidden = false; }
+      }, 8000);
+      return;
+    }
+
+    keepSeated();
+
+    /* a React re-render can shuffle its own children around ours, so
+       check a few times that the rail is still under the marquee */
+    function keepSeated() {
+      var checks = 0;
+      var timer = window.setInterval(function () {
+        if (++checks > 10) return window.clearInterval(timer);
+        if (anchor && anchor.parentNode && shell.previousElementSibling !== anchor) {
+          anchor.parentNode.insertBefore(shell, anchor.nextSibling);
+        }
+      }, 700);
+    }
   }
 
   if (document.readyState === "loading") {

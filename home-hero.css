@@ -1,11 +1,13 @@
 /* ============================================================
-   Allegiant Attire — "On the rail" homepage intro
-   Styled in the storefront's own language: Archivo black display,
-   JetBrains Mono labels, 2px hard borders, offset shadows, 44px
-   grid paper. Follows the site's dark toggle (body.dark-mono).
+   Allegiant Attire — "On the rail"
+   A band inside the storefront, sitting under the running marquee:
+   ten garments hanging on a steel rail, each turning to face you.
+   The script lifts this block into place once React has painted.
 
-   Every selector is prefixed .aa- and scoped to .aa-home-shell /
-   .aa-dialog so the React storefront underneath is untouched.
+   Styled in the storefront's own language — JetBrains Mono labels,
+   44px grid paper, the site's dark toggle (body.dark-mono). Every
+   selector is prefixed .aa- and scoped to .aa-home-shell /
+   .aa-dialog so the React storefront around it is untouched.
    ============================================================ */
 
 .aa-home-shell {
@@ -24,23 +26,18 @@
   --aa-rail-cap-edge: #b8b9af;
   --aa-wire: linear-gradient(90deg, #b9b9ac, #a7a895, #d5d5c8);
 
-  /* Rail geometry and motion: every value below is the reference
-     build's own — stage, insets, garment box, angles, easing, shares
-     and delays — and the garment images were re-canvassed to its
-     640x900 proportion so they render identically. */
-
-  /* Motion, ported verbatim from the reference build: the rest angle,
-     the share of the stage an open garment takes, the easing curve and
-     the two animation delays are its values, not approximations. */
+  /* Geometry and motion are the reference build's own values — stage,
+     insets, garment box, rest angle, easing, the share an open garment
+     takes and the two animation delays — and the garment images were
+     re-canvassed to its 640x900 proportion so they render identically. */
   --aa-turn-rest: -69deg;
   --aa-grow: 3.05;
   --aa-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100svh;
+  display: block;
+  border-bottom: 2px solid var(--aa-line);
   background-color: var(--aa-bg);
   background-image:
     linear-gradient(90deg, var(--aa-grid) 1px, transparent 1px),
@@ -51,6 +48,11 @@
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+
+/* the band is revealed by home-hero.js once it has been moved into
+   place under the storefront marquee — [hidden] needs to beat the
+   display above, which is more specific than the UA rule */
+.aa-home-shell[hidden] { display: none; }
 
 body.dark-mono .aa-home-shell,
 body.dark-mono .aa-dialog {
@@ -97,167 +99,24 @@ body.dark-mono .aa-dialog {
 }
 
 /* ---------------- shared mono bits ---------------- */
-.aa-mono,
-.aa-chip,
-.aa-btn,
-.aa-rail-caption,
-.aa-garment-index,
-.aa-marquee-group,
-.aa-footer-bottom,
-.aa-menu-btn,
-.aa-shop-link {
+.aa-mono, .aa-rail-caption, .aa-garment-index {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   text-transform: uppercase;
   letter-spacing: 0.18em;
 }
 
-.aa-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 10px;
-  border: 1px solid var(--aa-line);
-  font-size: 10px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.aa-chip-solid {
-  background: var(--aa-fg);
-  color: var(--aa-bg);
-  border-color: var(--aa-fg);
-}
-
-.aa-chip-ghost { border-color: transparent; color: var(--aa-muted-fg); }
-
-.aa-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 13px 26px;
-  border: 2px solid var(--aa-line);
-  font-size: 11px;
-  font-weight: 700;
-  transition: transform 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s;
-}
-
-.aa-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
-
-.aa-btn-solid {
-  background: var(--aa-fg);
-  color: var(--aa-bg);
-  box-shadow: 5px 5px 0 var(--aa-shadow);
-}
-
-.aa-btn-solid:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--aa-shadow); }
-.aa-btn-ghost:hover { background: var(--aa-fg); color: var(--aa-bg); }
-
-/* ---------------- header ---------------- */
-.aa-site-header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-  padding: 14px clamp(16px, 3vw, 40px);
-  border-bottom: 2px solid var(--aa-line);
-  background: var(--aa-bg);
-}
-
-.aa-brand-home { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.aa-brand-home img { display: block; width: auto; height: 42px; object-fit: contain; }
-body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
-
-.aa-brand-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-
-.aa-brand-lockup {
-  font-size: clamp(15px, 2.4vw, 21px);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.aa-brand-sub {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.3em;
-  color: var(--aa-muted-fg);
-  white-space: nowrap;
-}
-
-.aa-header-actions { display: flex; align-items: center; gap: 8px; }
-
-.aa-menu-btn,
-.aa-shop-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  height: 40px;
-  padding: 0 16px;
-  border: 2px solid var(--aa-line);
-  font-size: 10px;
-  font-weight: 700;
-  transition: background 0.15s, color 0.15s;
-}
-
-.aa-menu-btn:hover,
-.aa-shop-link:hover { background: var(--aa-fg); color: var(--aa-bg); }
-
-.aa-menu-btn .aa-burger { display: grid; gap: 4px; width: 14px; }
-.aa-menu-btn .aa-burger i { display: block; height: 2px; background: currentColor; }
-.aa-shop-link svg { width: 11px; height: 11px; transition: transform 0.2s; }
-.aa-shop-link:hover svg { transform: translate(2px, -2px); }
-
 /* ---------------- stage ---------------- */
 .aa-home-main {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(18px, 3.4svh, 40px) 0 clamp(16px, 3svh, 34px);
+  padding: clamp(30px, 4vw, 56px) 0 clamp(26px, 3.4vw, 44px);
 }
 
 .aa-rail-experience { width: 100%; }
 
-.aa-collection-eyebrow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 clamp(16px, 4vw, 44px);
-}
-
-.aa-hero-title {
-  margin: clamp(14px, 2.4svh, 26px) auto 0;
-  max-width: 16ch;
-  padding: 0 clamp(16px, 4vw, 44px);
-  font-size: clamp(2.1rem, 7vw, 4.6rem);
-  font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  text-align: center;
-  text-transform: uppercase;
-  text-wrap: balance;
-}
-
-.aa-hero-title .aa-boxed {
-  display: inline-block;
-  margin-top: 0.08em;
-  padding: 0 0.18em;
-  border: 2px solid var(--aa-line);
-  background: var(--aa-fg);
-  color: var(--aa-bg);
-}
-
 /* --- the rail itself --- */
-.aa-rail-scroll {
-  width: 100%;
-  margin-top: clamp(16px, 3svh, 34px);
-}
+.aa-rail-scroll { width: 100%; }
 
 .aa-rail-scroll::-webkit-scrollbar { display: none; }
 
@@ -413,7 +272,7 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: clamp(14px, 2.6svh, 26px);
+  margin-top: 30px;
   padding: 0 clamp(16px, 4vw, 44px);
   text-align: center;
 }
@@ -437,77 +296,7 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 .aa-mobile-hint { display: none; }
 
-.aa-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: clamp(16px, 2.8svh, 28px);
-}
-
 /* ---------------- footer ---------------- */
-.aa-site-footer { flex-shrink: 0; border-top: 2px solid var(--aa-line); }
-
-.aa-brand-marquee {
-  display: flex;
-  align-items: center;
-  height: 38px;
-  overflow: hidden;
-  background: var(--aa-fg);
-  color: var(--aa-bg);
-}
-
-.aa-marquee-track {
-  display: flex;
-  flex-shrink: 0;
-  width: max-content;
-  animation: aa-marquee 42s linear infinite;
-}
-
-.aa-brand-marquee:hover .aa-marquee-track { animation-play-state: paused; }
-
-.aa-marquee-group {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 54px;
-  padding-right: 54px;
-  font-size: 10px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.aa-marquee-star {
-  flex-shrink: 0;
-  width: 7px;
-  height: 7px;
-  background: currentColor;
-  transform: rotate(45deg);
-}
-
-.aa-footer-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px clamp(16px, 3vw, 40px);
-  font-size: 9px;
-  font-weight: 500;
-  color: var(--aa-muted-fg);
-}
-
-.aa-footer-bottom button,
-.aa-footer-bottom a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: color 0.2s;
-}
-
-.aa-footer-bottom button:hover,
-.aa-footer-bottom a:hover { color: var(--aa-fg); }
 
 /* ---------------- dialogs ---------------- */
 .aa-dialog {
@@ -701,136 +490,8 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
 .aa-detail-bottom a { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
 .aa-detail-bottom a:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-.aa-menu-dialog {
-  width: min(620px, 100vw - 24px);
-  max-width: 620px;
-  max-height: calc(100svh - 32px);
-  padding: clamp(22px, 4vw, 36px);
-  overflow-y: auto;
-}
-
-.aa-menu-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.aa-menu-top .aa-dialog-close { position: static; }
-
-.aa-menu-top .aa-brand-lockup {
-  font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-}
-
-.aa-menu-links { display: flex; flex-direction: column; margin-top: 28px; border-top: 2px solid var(--aa-line); }
-
-.aa-menu-links > a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 15px 10px;
-  border-bottom: 2px solid var(--aa-line);
-  font-size: clamp(1.2rem, 3.4vw, 1.7rem);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  transition: background 0.15s, color 0.15s, padding-left 0.15s;
-}
-
-.aa-menu-links > a:hover { background: var(--aa-fg); color: var(--aa-bg); padding-left: 18px; }
-.aa-menu-links span { display: flex; align-items: baseline; gap: 14px; }
-
-.aa-menu-links small {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  color: var(--aa-muted-fg);
-}
-
-.aa-menu-links > a:hover small { color: inherit; }
-
-.aa-menu-address { display: flex; flex-direction: column; gap: 10px; margin-top: 26px; }
-
-.aa-menu-address > span,
-.aa-menu-address a,
-.aa-menu-signoff {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.aa-menu-address > span { color: var(--aa-muted-fg); }
-.aa-menu-address p { margin: 0; font-size: 14px; line-height: 1.6; }
-.aa-menu-address a { font-weight: 700; }
-.aa-menu-address a:hover { text-decoration: underline; text-underline-offset: 4px; }
-.aa-menu-signoff { margin: 26px 0 0; color: var(--aa-muted-fg); }
-
-.aa-about-dialog[open] { display: flex; flex-direction: column; }
-
-.aa-about-dialog {
-  gap: 20px;
-  width: min(520px, 100vw - 24px);
-  max-width: 520px;
-  max-height: calc(100svh - 32px);
-  padding: clamp(26px, 4vw, 42px);
-  overflow-y: auto;
-}
-
-.aa-about-eyebrow {
-  margin: 0 0 14px;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.25em;
-  color: var(--aa-muted-fg);
-  text-transform: uppercase;
-}
-
-.aa-about-title {
-  margin: 0;
-  font-size: clamp(2rem, 7vw, 3.1rem);
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
-  text-transform: uppercase;
-}
-
-.aa-about-description { margin: 16px 0 0; font-size: 14px; line-height: 1.7; }
-.aa-about-copy { margin: 0; font-size: 13px; line-height: 1.8; color: var(--aa-muted-fg); }
-
-.aa-about-shop {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  width: fit-content;
-  padding: 12px 22px;
-  border: 2px solid var(--aa-line);
-  background: var(--aa-fg);
-  color: var(--aa-bg);
-  box-shadow: 5px 5px 0 var(--aa-shadow);
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.aa-about-shop:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--aa-shadow); }
-
-.aa-about-location {
-  margin: 0;
-  padding-top: 14px;
-  border-top: 2px solid var(--aa-line);
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  color: var(--aa-muted-fg);
-  text-transform: uppercase;
-}
-
 /* ---------------- keyframes ---------------- */
-@keyframes aa-marquee { to { transform: translateX(-50%); } }
+
 @keyframes aa-gentle-sway { 0%, 100% { rotate: -1deg; } 50% { rotate: 1deg; } }
 @keyframes aa-garment-arrive { 0% { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes aa-caption-in { 0% { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
@@ -846,9 +507,9 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
   .aa-rail-stage { width: 89vw; height: 300px; }
   .aa-garments { inset-inline: 20px; }
   .aa-garment-swing { width: 218px; margin-left: -109px; }
-  .aa-brand-home img { height: 34px; }
-  .aa-menu-btn .aa-label { display: none; }
-  .aa-menu-btn, .aa-shop-link { height: 38px; padding: 0 13px; }
+  
+  
+  
 }
 
 @media (max-width: 600px) {
@@ -866,14 +527,14 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
   .aa-garments { inset-inline: 15px; }
   .aa-garment-swing { width: 220px; margin-left: -110px; }
 
-  .aa-site-header { padding: 11px 14px; }
-  .aa-brand-sub { letter-spacing: 0.2em; font-size: 8px; }
-  .aa-hero-title { max-width: 12ch; }
+  
+  
+  
   .aa-desktop-hint { display: none; }
   .aa-mobile-hint { display: block; }
-  .aa-btn { padding: 12px 18px; font-size: 10px; }
-  .aa-marquee-group { gap: 34px; padding-right: 34px; font-size: 9px; }
-  .aa-footer-bottom { justify-content: center; text-align: center; font-size: 8px; }
+  
+  
+  
   .aa-detail-turntable { width: 76%; }
   .aa-detail-topline { gap: 14px; font-size: 8px; }
   .aa-detail-bottom { justify-content: center; gap: 10px; }
@@ -884,9 +545,7 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
    IS the interface. Killing every transition here left the whole hero
    frozen for anyone with Windows 'animation effects' switched off. */
 @media (prefers-reduced-motion: reduce) {
-  .aa-garment-swing,
-  .aa-marquee-track,
-  .aa-caption-title {
+  .aa-garment-swing, .aa-caption-title {
     animation: none !important;
   }
 
