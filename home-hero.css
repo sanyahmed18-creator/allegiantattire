@@ -27,19 +27,12 @@
   --aa-garment-w: clamp(142px, 17vw, 216px);
   --aa-gap: clamp(2px, 0.5vw, 8px);
 
-  /* how far a garment is turned away from you, by distance from the
-     one you are pointing at — the rail parts rather than snapping */
-  --aa-turn-rest: -66deg;
-  --aa-turn-near: -58deg;
-  --aa-turn-far: -63deg;
-
-  /* how the stage width is shared out, same distance scale */
-  --aa-grow: 2.6;
-  --aa-grow-near: 1.2;
-  --aa-grow-far: 1.05;
-
-  /* a pendulum settles, it does not glide to a stop */
-  --aa-spring: cubic-bezier(0.22, 1.32, 0.36, 1);
+  /* Motion, ported verbatim from the reference build: the rest angle,
+     the share of the stage an open garment takes, the easing curve and
+     the two animation delays are its values, not approximations. */
+  --aa-turn-rest: -69deg;
+  --aa-grow: 3.05;
+  --aa-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   position: relative;
   z-index: 1;
@@ -309,10 +302,11 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   flex: 1 1 0;
   min-width: 0;
   height: 100%;
-  perspective: 1000px;
+  perspective: 900px;
   scroll-snap-align: center;
   z-index: 1;
-  transition: flex-grow 0.7s var(--aa-spring);
+  outline-offset: 0 !important;
+  transition: flex-grow 0.75s var(--aa-ease);
 }
 
 .aa-garment > * { pointer-events: none; }
@@ -336,16 +330,10 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   height: calc(100% - 44px);
   --arrival: 0ms;
   --sway: 0s;
-  --kick: 0;
   transform-origin: 50% 0;
-  animation: aa-garment-arrive 0.9s cubic-bezier(0.16, 1, 0.3, 1) both,
+  animation: aa-garment-arrive 0.95s cubic-bezier(0.16, 1, 0.3, 1) both,
              aa-gentle-sway 6s ease-in-out infinite;
   animation-delay: var(--arrival), var(--sway);
-}
-
-/* the hanger is knocked as the pointer sweeps past, then settles */
-.aa-garment-swing.is-kick {
-  animation: aa-swing-kick 1.05s cubic-bezier(0.25, 0.9, 0.3, 1) both;
 }
 
 .aa-garment-turn {
@@ -354,9 +342,9 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   height: 100%;
   transform-origin: 50% 0;
   transform: rotateY(var(--aa-turn, var(--aa-turn-rest))) rotate(var(--aa-lean, -2deg));
-  filter: drop-shadow(5px 4px 3px #0a0a0a14);
+  filter: drop-shadow(7px 5px 4px #0a0a0a14);
   will-change: transform;
-  transition: transform 0.72s var(--aa-spring), filter 0.5s linear;
+  transition: transform 0.8s var(--aa-ease), filter 0.8s;
 }
 
 .aa-garment-turn img {
@@ -383,28 +371,14 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 /* --- active garment: faces you, the rail accordions open --- */
 .aa-garment.is-active {
-  z-index: 6;
+  z-index: 3;
   flex-grow: var(--aa-grow);
   --aa-turn: 0deg;
   --aa-lean: 0deg;
 }
 
 .aa-garment.is-active .aa-garment-turn {
-  filter: drop-shadow(9px 10px 8px #0a0a0a2b);
-}
-
-/* the two pieces either side are pushed open a little too */
-.aa-garment.is-near {
-  z-index: 4;
-  flex-grow: var(--aa-grow-near);
-  --aa-turn: var(--aa-turn-near);
-  --aa-lean: -1deg;
-}
-
-.aa-garment.is-far {
-  z-index: 3;
-  flex-grow: var(--aa-grow-far);
-  --aa-turn: var(--aa-turn-far);
+  filter: drop-shadow(7px 7px 5px #0a0a0a1f);
 }
 
 .aa-garment.is-active .aa-garment-swing { animation-play-state: running, paused; }
@@ -417,12 +391,12 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 /* CSS-only mirror of the same state, so the rail still turns on hover
    even before (or without) the script */
-/* The same choreography in pure CSS, so the rail reacts on the very
-   first hover — before, or entirely without, the script. */
+/* The same single hover state in pure CSS, so the rail reacts on the
+   very first hover — before, or entirely without, the script. */
 @media (hover: hover) and (pointer: fine) {
   .aa-garment:hover,
   .aa-garment:focus-visible {
-    z-index: 6;
+    z-index: 3;
     flex-grow: var(--aa-grow);
     --aa-turn: 0deg;
     --aa-lean: 0deg;
@@ -430,28 +404,7 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
   .aa-garment:hover .aa-garment-turn,
   .aa-garment:focus-visible .aa-garment-turn {
-    filter: drop-shadow(9px 10px 8px #0a0a0a2b);
-  }
-
-  /* next door, either side */
-  .aa-garment:hover + .aa-garment,
-  .aa-garment:focus-visible + .aa-garment,
-  .aa-garment:has(+ .aa-garment:hover),
-  .aa-garment:has(+ .aa-garment:focus-visible) {
-    z-index: 4;
-    flex-grow: var(--aa-grow-near);
-    --aa-turn: var(--aa-turn-near);
-    --aa-lean: -1deg;
-  }
-
-  /* one further out */
-  .aa-garment:hover + .aa-garment + .aa-garment,
-  .aa-garment:focus-visible + .aa-garment + .aa-garment,
-  .aa-garment:has(+ .aa-garment + .aa-garment:hover),
-  .aa-garment:has(+ .aa-garment + .aa-garment:focus-visible) {
-    z-index: 3;
-    flex-grow: var(--aa-grow-far);
-    --aa-turn: var(--aa-turn-far);
+    filter: drop-shadow(7px 7px 5px #0a0a0a1f);
   }
 
   .aa-garment:hover .aa-garment-swing,
@@ -888,25 +841,16 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
 
 /* ---------------- keyframes ---------------- */
 @keyframes aa-marquee { to { transform: translateX(-50%); } }
-@keyframes aa-gentle-sway { 0%, 100% { rotate: -1.2deg; } 50% { rotate: 1.2deg; } }
-@keyframes aa-swing-kick {
-  0%   { rotate: 0deg; }
-  18%  { rotate: calc(var(--kick) * 1.4deg); }
-  44%  { rotate: calc(var(--kick) * -0.52deg); }
-  66%  { rotate: calc(var(--kick) * 0.24deg); }
-  84%  { rotate: calc(var(--kick) * -0.1deg); }
-  100% { rotate: 0deg; }
-}
-@keyframes aa-garment-arrive { 0% { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes aa-gentle-sway { 0%, 100% { rotate: -1deg; } 50% { rotate: 1deg; } }
+@keyframes aa-garment-arrive { 0% { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes aa-caption-in { 0% { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ---------------- breakpoints ---------------- */
 @media (max-width: 900px) {
   .aa-home-shell {
     --aa-garment-w: clamp(128px, 17.5vw, 180px);
-    --aa-turn-rest: -70deg;
-    --aa-turn-near: -62deg;
-    --aa-turn-far: -67deg;
+    --aa-turn-rest: -74deg;
+    --aa-grow: 3.6;
   }
   .aa-brand-home img { height: 34px; }
   .aa-menu-btn .aa-label { display: none; }
@@ -919,11 +863,7 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
     --aa-stage-h: clamp(190px, 30svh, 250px);
     --aa-gap: 2px;
     --aa-grow: 2.8;
-    --aa-grow-near: 1.15;
-    --aa-grow-far: 1.04;
-    --aa-turn-rest: -72deg;
-    --aa-turn-near: -64deg;
-    --aa-turn-far: -69deg;
+    --aa-turn-rest: -68deg;
   }
 
   .aa-site-header { padding: 11px 14px; }
