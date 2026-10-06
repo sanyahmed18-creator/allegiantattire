@@ -1,14 +1,31 @@
 #!/usr/bin/env bash
-# One command: patch the build, generate the blog, validate.
-#   ./apply-all.sh <build-output-dir>
-set -e
-DIR="${1:-dist}"
+# Apply the checked-in static-site patches, regenerate the blog pages/sitemap,
+# and validate the deployable site.
+# Usage: ./apply-all.sh [site-root]
+# Example from this repository: ./apply-all.sh .
+set -euo pipefail
+
 HERE="$(cd "$(dirname "$0")" && pwd)"
-echo "=== 1/3 patch (password, email, cf-email, h1) ==="
-python3 "$HERE/site/patch-build.py" "$DIR"
+DIR="${1:-$HERE}"
+
+echo "=== 1/4 patch shipped JS/HTML assets ==="
+python3 "$HERE/scripts/patch-build.py" "$DIR"
+
 echo
-echo "=== 2/3 build blog pages ==="
-python3 "$HERE/site/build-blog.py" "$DIR"
+echo "=== 2/4 regenerate static blog pages and sitemap ==="
+python3 "$HERE/scripts/build-blog.py" "$DIR"
+
 echo
-echo "=== 3/3 validate ==="
-node "$HERE/fix-pack/scripts/seo-validate.mjs" --dist "$DIR"
+echo "=== 3/4 check JavaScript syntax ==="
+node --check "$DIR/custom.js"
+found_bundle=0
+for bundle in "$DIR"/assets/index-*.js; do
+  [[ -f "$bundle" ]] || continue
+  found_bundle=1
+  node --check "$bundle"
+done
+[[ "$found_bundle" -eq 1 ]] || { echo "No assets/index-*.js bundle found in $DIR" >&2; exit 1; }
+
+echo
+echo "=== 4/4 validate deployable HTML and crawl files ==="
+node "$HERE/scripts/seo-validate.mjs" --dist "$DIR"

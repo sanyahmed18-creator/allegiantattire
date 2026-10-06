@@ -2,22 +2,21 @@
 /*
  * Allegiant Attire — SEO page prerenderer
  * ------------------------------------------------------------------
- * WHY THIS EXISTS
- *   Your site is a client-rendered SPA. The served HTML is 997 bytes:
- *   <div id="root"></div> and nothing else. Every URL other than "/"
- *   404s. So Google has exactly ONE page to rank for the entire
- *   business, and there is nothing that can rank for
- *   "custom t-shirts dubai", "dtf printing dubai", "school uniforms uae".
+ * LEGACY / OPTIONAL
+ *   The current repository already contains static HTML for the homepage,
+ *   service pages and blog routes. Those files are the deployable site; this
+ *   older generator is not part of apply-all.sh and is not needed for a direct
+ *   deploy. It writes a separate output directory from scripts/pages.json and
+ *   can overwrite copy, URLs or facts if you run it without reviewing that data.
  *
- *   This script turns pages.json into real static HTML pages that ship
- *   inside your existing build, styled by your existing CSS, with real
- *   <title>, meta description, canonical, Open Graph, breadcrumbs and
- *   JSON-LD per page.
+ *   If you intentionally restore a separate Vite build, first verify every
+ *   field in scripts/pages.json (especially pricing, lead times and contact
+ *   details), then run the generator against that build output. Do not point it
+ *   at the repository root or use its output as a substitute for the checked-in
+ *   static pages without reviewing the result.
  *
- * USAGE (from repo root)
- *   npm run build
+ * OPTIONAL USAGE
  *   node scripts/prerender-seo-pages.mjs --dist dist --pages scripts/pages.json
- *   # then deploy dist/ as you normally do (GitHub Pages)
  *
  *   Add  "postbuild": "node scripts/prerender-seo-pages.mjs"  to
  *   package.json so it never gets forgotten.

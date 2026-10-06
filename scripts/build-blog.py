@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
 """
-Allegiant Attire — build the blog as real, crawlable pages.
+Allegiant Attire — generate the checked-in static blog pages and update the sitemap.
 
-Why: the "FROM THE JOURNAL" section shows 4 articles, but "READ ARTICLE" is a
-<button> with no href. Google cannot follow it, so all 4 articles are invisible
-to search. One of them (/blog/choosing-a-bulk-t-shirt-printer-in-the-uae/)
-already has a page; the other 3 do not, and there is no /blog/ index.
-
-This writes:
+The source of truth is scripts/posts.json. This script writes:
     blog/index.html
     blog/dtf-printing-in-dubai/index.html
     blog/how-to-select-the-perfect-customized-hoodie/index.html
     blog/how-to-design-custom-hoodies-for-business-or-event/index.html
-    blog/choosing-a-bulk-t-shirt-printer-in-the-uae/index.html   (rebuilt, expanded)
+    blog/choosing-a-bulk-t-shirt-printer-in-the-uae/index.html
 
-and adds the new URLs to sitemap.xml.
+It keeps article metadata and sitemap URLs aligned. It does not edit the
+homepage; the checked-in homepage already links to the guide index/articles.
+Run from the repository root (or pass another site root):
 
-    python3 scripts/build-blog.py .            # . = your build output folder
+    python3 scripts/build-blog.py .
 
-Content comes from posts.json (the real copy already in your bundle) plus
-supplementary sections written from your own site's specs. Extend them.
+Content and business claims in posts.json/this generator require owner review.
+A word-count threshold is not a ranking guarantee or a substitute for accuracy.
 """
 from __future__ import annotations
 import json, re, sys
 from pathlib import Path
 from datetime import date
+import xml.etree.ElementTree as ET
 
 ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
+INDEX_UPDATED = "2026-10-06"
+
 BIZ = {
     "name": "Allegiant Attire",
     "url": "https://allegiantattire.store/",
@@ -64,8 +64,8 @@ HERO = {
     "bulk": "/images/p-tee.jpg",
 }
 
-# Supplementary sections — written from the specs on your own site. Extend these;
-# thin posts (under ~400 words) will not hold a ranking.
+# Supplementary draft sections. Verify operational claims with the owner before
+# publishing; adding words alone does not guarantee rankings.
 EXTRA = {
     "dtf": [
         ("What DTF actually is",
@@ -178,6 +178,9 @@ def page(post):
     url = f"{BIZ['url']}blog/{slug}/"
     title, desc = META[post["id"]]
     published = iso(post["date"])
+    modified = post.get("updated", published)
+    updated_label = (f' · Updated <time datetime="{modified}">{modified}</time>'
+                     if modified != published else "")
     words = sum(len(p.split()) for p in post["body"]) + sum(len(b.split()) for _, b in EXTRA[post["id"]])
 
     ld = {
@@ -190,7 +193,7 @@ def page(post):
             ]},
             {"@type": "Article", "@id": f"{url}#article", "headline": post["title"],
              "description": desc, "image": f"{BIZ['url'].rstrip('/')}{HERO[post['id']]}",
-             "datePublished": published, "dateModified": published, "inLanguage": "en-AE",
+             "datePublished": published, "dateModified": modified, "inLanguage": "en-AE",
              "mainEntityOfPage": url, "articleSection": post["tag"],
              "wordCount": words,
              "author": {"@type": "Organization", "name": BIZ["name"], "url": BIZ["url"]},
@@ -228,6 +231,7 @@ def page(post):
   <meta property="og:description" content="{esc(desc)}" />
   <meta property="og:image" content="{BIZ['url'].rstrip('/')}{HERO[post['id']]}" />
   <meta property="article:published_time" content="{published}" />
+  <meta property="article:modified_time" content="{modified}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{esc(title)}" />
   <meta name="twitter:description" content="{esc(desc)}" />
@@ -251,7 +255,7 @@ def page(post):
     </nav>
 
     <header class="aa-pagehead">
-      <p class="aa-meta">{esc(post['tag'])} · <time datetime="{published}">{esc(post['date'])}</time> · {esc(post['read'])} read</p>
+      <p class="aa-meta">{esc(post['tag'])} · <time datetime="{published}">{esc(post['date'])}</time> · {esc(post['read'])} read{updated_label}</p>
       <h1>{esc(post['title'])}</h1>
       <p class="aa-lede">{esc(post['excerpt'])}</p>
       <p class="aa-cta">
@@ -312,13 +316,19 @@ def index_page():
   <meta name="description" content="Practical guides from our Ajman factory: DTF vs screen printing, hoodie GSM and fit, designing for bulk, and how to vet a bulk t-shirt printer in the UAE." />
   <link rel="canonical" href="{url}" />
   <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0b0b0c" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="{BIZ['name']}" />
+  <meta property="og:locale" content="en_AE" />
   <meta property="og:url" content="{url}" />
   <meta property="og:title" content="Guides &amp; Methods — Custom Clothing UAE" />
   <meta property="og:description" content="Practical garment manufacturing guides: print methods, fabric weights, sizing curves and how to vet a bulk supplier." />
   <meta property="og:image" content="{BIZ['url'].rstrip('/')}/images/og-cover-1200x630.jpg" />
+  <meta property="og:image:alt" content="Custom apparel manufacturing and print methods from Allegiant Attire in Ajman, UAE" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Guides &amp; Methods — Custom Clothing UAE" />
+  <meta name="twitter:description" content="Practical garment manufacturing guides: print methods, fabric weights, sizing curves and how to vet a bulk supplier." />
+  <meta name="twitter:image" content="{BIZ['url'].rstrip('/')}/images/og-cover-1200x630.jpg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
   <script type="application/ld+json">
 {json.dumps(ld, indent=2, ensure_ascii=False)}
@@ -333,7 +343,20 @@ def index_page():
       <h1>Guides &amp; Methods</h1>
       <p class="aa-lede">What we have learned running an in-house cut, stitch and print factory in Ajman — written for the people who have to place the order.</p>
     </header>
-    <section class="aa-posts">
+    <section aria-labelledby="guide-start">
+      <h2 id="guide-start">Start with your order brief</h2>
+      <p>Before comparing suppliers, note the garment type, quantity by size, artwork, decoration method and required delivery date. Those details shape a realistic price and production plan far more than a generic “best printer” list.</p>
+      <p>As a starting point, DTF suits small runs, complex full-colour artwork and urgent orders. Screen printing can lower the unit cost on larger runs with a few spot colours. Embroidery is a common finish for polos, caps and workwear. Sublimation is used for all-over designs on suitable polyester fabrics. The right choice still depends on your fabric, artwork, quantity, finish and deadline.</p>
+      <h2>Use these guides to compare your options</h2>
+      <ul>
+        <li><a href="/blog/dtf-printing-in-dubai/">DTF printing in Dubai</a> — process, sample checks, turnaround and when to compare screen printing.</li>
+        <li><a href="/blog/how-to-select-the-perfect-customized-hoodie/">Choosing a custom hoodie</a> — GSM, fleece, fit blocks and finishing.</li>
+        <li><a href="/blog/how-to-design-custom-hoodies-for-business-or-event/">Designing business or event hoodies</a> — audience, print placement and size planning.</li>
+        <li><a href="/blog/choosing-a-bulk-t-shirt-printer-in-the-uae/">Vetting a bulk t-shirt printer</a> — samples, MOQs, production steps and quote questions.</li>
+      </ul>
+      <p>Use the articles as a checklist, then request a physical sample before approving a large run. Ask suppliers to confirm fabric composition and GSM, print or stitch placement, setup charges, sample approval, wash-care instructions, packaging and the delivery date. For a quote from our Ajman factory, send the garment, quantities by size, artwork and target date through the <a href="/contact/">contact page</a>.</p>
+    </section>
+    <section class="aa-posts" aria-label="All manufacturing guides">
 {cards}
     </section>
     <footer class="aa-pagefoot">
@@ -350,7 +373,9 @@ def index_page():
 
 
 posts_path = ROOT / "posts.json"
-POSTS = json.loads(posts_path.read_text()) if posts_path.exists() else []
+if not posts_path.exists():
+    posts_path = Path(__file__).with_name("posts.json")
+POSTS = json.loads(posts_path.read_text(encoding="utf-8")) if posts_path.exists() else []
 if not POSTS:
     print("posts.json not found or empty — run the extractor first", file=sys.stderr)
     raise SystemExit(1)
@@ -371,24 +396,51 @@ for p in POSTS:
         new_urls.append(u)
     print(f"  ✓ blog/{slug}/index.html")
 
-# ---- add the new URLs to sitemap.xml ----
+# ---- add/update blog URLs in sitemap.xml ----
 sm = ROOT / "sitemap.xml"
 if sm.exists():
-    xml = sm.read_text(encoding="utf-8")
-    today = date.today().isoformat()
-    added = 0
-    for u in new_urls:
-        if u in xml:
-            continue
-        block = (f"  <url>\n    <loc>{u}</loc>\n    <lastmod>{today}</lastmod>\n"
-                 f"    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n")
-        xml = xml.replace("</urlset>", block + "</urlset>")
-        added += 1
-    sm.write_text(xml, encoding="utf-8")
-    print(f"  ✓ sitemap.xml +{added} URLs (now {xml.count('<loc>')} total)")
-else:
-    print("  ! sitemap.xml not found in this folder — add the URLs manually:")
-    for u in new_urls:
-        print(f"      {u}")
+    namespace = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    ET.register_namespace("", namespace)
+    tree = ET.parse(sm)
+    sitemap_root = tree.getroot()
+    tag = lambda name: f"{{{namespace}}}{name}"
+    existing = {}
+    for node in sitemap_root.findall(tag("url")):
+        loc_node = node.find(tag("loc"))
+        if loc_node is not None and loc_node.text:
+            existing[loc_node.text] = node
+        # Google ignores changefreq and priority; keep this sitemap to useful data.
+        for child in list(node):
+            if child.tag in {tag("changefreq"), tag("priority")}:
+                node.remove(child)
 
-print("\nDone. Next: paste the blog links into your homepage footer and re-run the SEO validator.")
+    updates = {f"{BIZ['url']}blog/": INDEX_UPDATED}
+    for post in POSTS:
+        slug = SLUG[post["id"]]
+        loc = f"{BIZ['url']}blog/{slug}/"
+        updates[loc] = post.get("updated") or iso(post["date"])
+
+    added = 0
+    for loc, lastmod in updates.items():
+        node = existing.get(loc)
+        if node is None:
+            node = ET.SubElement(sitemap_root, tag("url"))
+            ET.SubElement(node, tag("loc")).text = loc
+            added += 1
+        lastmod_node = node.find(tag("lastmod"))
+        if lastmod_node is None:
+            lastmod_node = ET.SubElement(node, tag("lastmod"))
+        lastmod_node.text = lastmod
+
+    ET.indent(sitemap_root, space="  ")
+    tree.write(sm, encoding="utf-8", xml_declaration=True)
+    with sm.open("a", encoding="utf-8") as f:
+        f.write("\n")
+    print(f"  ✓ sitemap.xml updated ({len(existing) + added} URLs, {added} added)")
+else:
+    print("  ! sitemap.xml not found in this folder — add /blog/ and the article URLs manually:")
+    print(f"      {BIZ['url']}blog/")
+    for post in POSTS:
+        print(f"      {BIZ['url']}blog/{SLUG[post['id']]}/")
+
+print("\nDone. Review the generated pages and run the SEO validator before deployment.")

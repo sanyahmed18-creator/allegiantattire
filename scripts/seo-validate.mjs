@@ -18,7 +18,8 @@
  *   - no internal 404s between generated pages
  *   - sitemap.xml parses and every URL in it has a matching file
  *   - robots.txt exists and points at the sitemap
- *   - body word count >= 250 on non-contact pages (thin pages do not rank)
+ *   - flags very sparse body copy for review (word count is not a ranking target)
+ *   - every indexable HTML route is present in the sitemap
  * No dependencies. Node 18+.
  */
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
@@ -46,6 +47,7 @@ const get = (h, re) => { const m = (h.match(re) || [])[1]; return m ? decode(m) 
 const all = (h, re) => [...h.matchAll(re)].map((m) => m[1]);
 
 const titles = new Map();
+const expectedSitemapUrls = new Set();
 const errors = [];
 const warnings = [];
 
@@ -90,9 +92,14 @@ for (const file of htmlFiles) {
   }
 
   if (!isNoindex) {
+    if (canonical) expectedSitemapUrls.add(canonical);
     if (!/property="og:image"/.test(h)) fail("missing og:image");
     if (!/property="og:title"/.test(h)) fail("missing og:title");
+    if (!/property="og:description"/.test(h)) fail("missing og:description");
     if (!/name="twitter:card"/.test(h)) fail("missing twitter:card");
+    if (!/name="twitter:title"/.test(h)) fail("missing twitter:title");
+    if (!/name="twitter:description"/.test(h)) fail("missing twitter:description");
+    if (!/name="twitter:image"/.test(h)) fail("missing twitter:image");
     if (rel === "404.html") fail("404.html must be noindexed");
   } else if (rel !== "404.html") fail("page is noindexed but is not 404.html");
 
@@ -144,7 +151,10 @@ else {
     const file2 = relPath ? join(dist, relPath) : join(dist, "index.html");
     if (!existsSync(file) && !existsSync(file2)) errors.push(`sitemap.xml: ${u} has no matching file`);
   }
-  console.log(`sitemap.xml: ${urls.length} URLs, all resolvable on disk`);
+  for (const expected of expectedSitemapUrls) {
+    if (!seen.has(expected)) errors.push(`sitemap.xml: missing indexable page ${expected}`);
+  }
+  console.log(`sitemap.xml: ${urls.length} URLs, all resolvable on disk; ${expectedSitemapUrls.size} indexable HTML pages checked`);
 }
 
 /* robots */
@@ -154,6 +164,10 @@ else {
   const r = readFileSync(robotsPath, "utf8");
   if (!/Sitemap:\s*https:\/\/allegiantattire\.store\/sitemap\.xml/.test(r)) errors.push("robots.txt: no Sitemap directive");
   if (/User-agent:\s*\*\s*\n\s*Disallow:\s*\/\s*$/m.test(r)) errors.push("robots.txt: wildcard Disallow: / — the whole site is blocked from Google");
+  for (const bot of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"]) {
+    const group = new RegExp(`User-agent:\\s*${bot}[\\s\\S]*?(?=\\nUser-agent:|$)`, "i").exec(r)?.[0] || "";
+    if (!/Allow:\s*\//i.test(group) || /Disallow:\s*\//i.test(group)) warnings.push(`robots.txt: ${bot} is not explicitly allowed for AI search discovery`);
+  }
 }
 
 console.log(`\nscanned ${htmlFiles.length} HTML files in ${dist}`);
