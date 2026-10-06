@@ -11,6 +11,17 @@
 - **Client-side admin fallback.** Bundled default passwords and the optional browser-only login fallback now fail closed. The site has no trusted server-side CMS/authentication unless you separately configure one; `localStorage` edits affect only that browser. Do not treat the public admin UI as access control.
 - **Host headers.** `.htaccess` contains a restrictive baseline policy that permits the site’s Google tag, Cloudflare Insights, and Google Fonts. It only applies on a compatible Apache host that allows these directives. If the site is served by GitHub Pages or another static host, configure equivalent headers/redirects at that host or Cloudflare instead.
 
+## Homepage — "On the rail"
+
+The homepage opens with a full-viewport garment rail, recreated from the reference build the owner supplied (layout, sizing, easings, keyframes and breakpoints all mirror it; copy, products and links are Allegiant Attire's).
+
+- `home-hero.css` / `home-hero.js` — styles and behaviour. Every selector is prefixed `.aa-` and scoped to `.aa-home-shell`, so nothing collides with the React bundle, `custom.css` or `custom.js`.
+- Markup lives in `index.html` **outside** `#root`, so React hydration can never wipe it. `<div id="aa-storefront"></div>` is the scroll target for the hero's *Shop* / *Explore* links.
+- How it behaves: garments hang edge-on (`rotateY(-69deg)`) and turn to face you when active (`rotateY(0)`, 0.8s `cubic-bezier(.2,.8,.2,1)`), while the rail accordions open around them (`flex-grow:3.05`). Pointer devices activate on hover/focus; touch devices scroll-snap the rail and activate whatever sits nearest the middle. Clicking opens the garment dialog (turntable, prev/next, product link, WhatsApp quote). Menu and About dialogs use native `<dialog>`.
+- `images/rail/*.webp` — garments shot on a chroma-key background and keyed to transparency, so they can turn in 3D without a photo box around them. Canvas is a shared 648 × 911 (the reference build’s 640 × 900 proportion) with the hanger hook at the top edge, which is what keeps every garment hanging on the same line at the same scale. Six garments have a matching `-back.webp`, which is what turns on the Front/Back turntable inside the garment dialog.
+
+To change a garment: add the keyed `.webp` to `images/rail/`, then edit the `ITEMS` list used to build the rail markup in `index.html` (keep `alt`, `width` and `height` — the SEO validator requires them).
+
 ## Run the deployment checks
 
 From the repository root:
