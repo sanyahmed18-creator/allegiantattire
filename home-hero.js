@@ -45,9 +45,10 @@
       caption.style.animation = "";
     }
 
+    var railSound = createRailSound(shell, garments.length);
     var active = -1;
 
-    function activate(index) {
+    function activate(index, options) {
       if (index === active) return;
       active = index;
 
@@ -61,6 +62,7 @@
       } else {
         setCaption(garments[index].dataset.name || captionDefault);
         if (hintWrap) hintWrap.classList.add("is-detail");
+        if (!(options && options.silent)) railSound.play(index);
       }
     }
 
@@ -74,6 +76,12 @@
     garments.forEach(function (el, i) {
       el.addEventListener("mouseenter", function () { activate(i); });
       el.addEventListener("pointerenter", function () { activate(i); });
+      /* Some touch browsers delay hover synthesis until after a tap. Set
+         the active garment on pointerdown so the visual response starts
+         with the finger, without waiting for scroll snapping or click. */
+      el.addEventListener("pointerdown", function (event) {
+        if (event.pointerType !== "mouse") activate(i);
+      }, { passive: true });
       el.addEventListener("focus", function () { activate(i); });
       el.addEventListener("blur", function () { activate(-1); });
     });
@@ -165,6 +173,7 @@
     if (dialog) {
       garments.forEach(function (el, i) {
         el.addEventListener("click", function () {
+          activate(i);
           paint(i);
           if (!openDialog(dialog)) window.location.href = items[i].href;
         });
@@ -205,13 +214,213 @@
          "hover to turn" invitation is demonstrated rather than stated */
       window.setTimeout(function () {
         if (active !== -1) return;
-        activate(Math.min(4, garments.length - 1));
+        activate(Math.min(4, garments.length - 1), { silent: true });
         window.setTimeout(function () { if (active === Math.min(4, garments.length - 1)) activate(-1); }, 1400);
       }, 1500);
     });
 
     /* ---------- lift the rail into the storefront ---------- */
     placeRail(shell);
+  }
+
+  /* Sound is opt-in and synthesized locally: a short, low-passed noise
+     envelope gives a soft fabric swish without fetching or autoplaying
+     an audio file. Context resume is retried from real pointer/keyboard
+     gestures so browsers with autoplay protection can unlock it safely. */
+  function createRailSound(shell, itemCount) {
+    var button = shell.querySelector(".aa-sound-toggle");
+    if (!button) return { play: function () {} };
+
+    var label = button.querySelector(".aa-sound-toggle-label");
+    var AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+    var enabled = false;
+    var context = null;
+    var noiseBuffer = null;
+    var queuedIndex = null;
+    var voices = [];
+    var lastPlayedAt = -Infinity;
+
+    function setUnavailable() {
+      button.disabled = true;
+      button.classList.remove("is-on");
+      button.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-label", "Rail sound is not available in this browser");
+      button.title = "Rail sound is not available in this browser";
+      if (label) label.textContent = "Sound unavailable";
+    }
+
+    function syncButton() {
+      var text = enabled ? "Sound on" : "Sound off";
+      var description = enabled ? "Turn rail sound off" : "Turn rail sound on";
+      button.classList.toggle("is-on", enabled);
+      button.setAttribute("aria-pressed", enabled ? "true" : "false");
+      button.setAttribute("aria-label", description);
+      button.title = description;
+      if (label) label.textContent = text;
+    }
+
+    if (!AudioContextConstructor) {
+      setUnavailable();
+      return { play: function () {} };
+    }
+
+    try {
+      enabled = window.localStorage.getItem("aa-rail-sound-v1") === "on";
+    } catch (error) {
+      enabled = false;
+    }
+    syncButton();
+
+    function getContext() {
+      if (context) return context;
+      try {
+        context = new AudioContextConstructor();
+      } catch (error) {
+        setUnavailable();
+        enabled = false;
+        return null;
+      }
+      return context;
+    }
+
+    function savePreference() {
+      try {
+        window.localStorage.setItem("aa-rail-sound-v1", enabled ? "on" : "off");
+      } catch (error) {
+        /* Sound still works for this page even when storage is unavailable. */
+      }
+    }
+
+    function getNoiseBuffer(audio) {
+      if (noiseBuffer) return noiseBuffer;
+      var frameCount = Math.ceil(audio.sampleRate * 0.28);
+      noiseBuffer = audio.createBuffer(1, frameCount, audio.sampleRate);
+      var samples = noiseBuffer.getChannelData(0);
+      for (var i = 0; i < samples.length; i += 1) {
+        samples[i] = Math.random() * 2 - 1;
+      }
+      return noiseBuffer;
+    }
+
+    function removeVoice(source) {
+      for (var i = voices.length - 1; i >= 0; i -= 1) {
+        if (voices[i].source === source) voices.splice(i, 1);
+      }
+    }
+
+    function stopVoices() {
+      queuedIndex = null;
+      if (!context) return;
+      var now = context.currentTime;
+      voices.slice().forEach(function (voice) {
+        try {
+          voice.gain.gain.cancelScheduledValues(now);
+          voice.gain.gain.setTargetAtTime(0.0001, now, 0.006);
+          voice.source.stop(now + 0.03);
+        } catch (error) {
+          /* A voice may already have finished between events. */
+        }
+      });
+    }
+
+    function playNow(index) {
+      if (!enabled || !context || context.state !== "running") return;
+      var now = context.currentTime;
+      if (now - lastPlayedAt < 0.075) return;
+      lastPlayedAt = now;
+
+      var duration = 0.24;
+      var source = context.createBufferSource();
+      var filter = context.createBiquadFilter();
+      var envelope = context.createGain();
+      var panner = context.createStereoPanner ? context.createStereoPanner() : null;
+
+      source.buffer = getNoiseBuffer(context);
+      filter.type = "lowpass";
+      filter.Q.setValueAtTime(0.45, now);
+      filter.frequency.setValueAtTime(480, now);
+      filter.frequency.exponentialRampToValueAtTime(1900, now + 0.075);
+      filter.frequency.exponentialRampToValueAtTime(620, now + duration);
+      envelope.gain.setValueAtTime(0.0001, now);
+      envelope.gain.exponentialRampToValueAtTime(0.045, now + 0.025);
+      envelope.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      source.connect(filter);
+      filter.connect(envelope);
+      if (panner) {
+        var pan = itemCount > 1 ? (index / (itemCount - 1)) * 1.1 - 0.55 : 0;
+        panner.pan.setValueAtTime(pan, now);
+        envelope.connect(panner);
+        panner.connect(context.destination);
+      } else {
+        envelope.connect(context.destination);
+      }
+
+      var voice = { source: source, gain: envelope };
+      voices.push(voice);
+      source.onended = function () {
+        removeVoice(source);
+        [source, filter, envelope, panner].forEach(function (node) {
+          if (node && typeof node.disconnect === "function") node.disconnect();
+        });
+      };
+      source.start(now);
+      source.stop(now + duration + 0.01);
+    }
+
+    function flushQueued() {
+      if (!enabled || queuedIndex === null || !context || context.state !== "running") return;
+      var index = queuedIndex;
+      queuedIndex = null;
+      playNow(index);
+    }
+
+    function resumeContext() {
+      if (!enabled) return;
+      var audio = getContext();
+      if (!audio || audio.state === "closed") return;
+      if (audio.state === "running") {
+        flushQueued();
+        return;
+      }
+      try {
+        var resumed = audio.resume();
+        if (resumed && typeof resumed.then === "function") {
+          resumed.then(flushQueued).catch(function () {});
+        }
+      } catch (error) {
+        /* The next user gesture will retry the browser's audio unlock. */
+      }
+    }
+
+    function play(index) {
+      if (!enabled) return;
+      var audio = getContext();
+      if (!audio) return;
+      if (audio.state !== "running") {
+        queuedIndex = index;
+        resumeContext();
+        return;
+      }
+      playNow(index);
+    }
+
+    function unlockFromGesture() {
+      if (enabled) resumeContext();
+    }
+
+    button.addEventListener("click", function () {
+      enabled = !enabled;
+      syncButton();
+      savePreference();
+      if (enabled) resumeContext();
+      else stopVoices();
+    });
+    document.addEventListener("pointerdown", unlockFromGesture, true);
+    document.addEventListener("keydown", unlockFromGesture, true);
+    window.addEventListener("pagehide", stopVoices);
+
+    return { play: play };
   }
 
   /* The drop-in and the idle sway are paused in CSS until .is-in-view

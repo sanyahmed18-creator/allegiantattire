@@ -33,6 +33,10 @@
   --aa-turn-rest: -69deg;
   --aa-grow: 3.05;
   --aa-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --aa-open-duration: 0.75s;
+  --aa-turn-duration: 0.8s;
+  --aa-arrival-duration: 0.95s;
+  --aa-detail-turn-duration: 0.85s;
 
   position: relative;
   z-index: 1;
@@ -169,7 +173,8 @@ body.dark-mono .aa-dialog {
   height: 100%;
   perspective: 900px;
   outline-offset: 0 !important;
-  transition: flex-grow 0.75s var(--aa-ease);
+  touch-action: manipulation;
+  transition: flex-grow var(--aa-open-duration) var(--aa-ease);
 }
 
 .aa-garment > * { pointer-events: none; }
@@ -196,7 +201,7 @@ body.dark-mono .aa-dialog {
   --sway: 0s;
   transform-origin: 50% 0;
   transform-style: preserve-3d;
-  animation: aa-garment-arrive 0.95s cubic-bezier(0.16, 1, 0.3, 1) both,
+  animation: aa-garment-arrive var(--aa-arrival-duration) cubic-bezier(0.16, 1, 0.3, 1) both,
              aa-gentle-sway 6s ease-in-out infinite;
   animation-delay: var(--arrival), var(--sway);
 }
@@ -208,8 +213,7 @@ body.dark-mono .aa-dialog {
   transform-origin: 50% 0;
   transform: rotateY(var(--aa-turn, var(--aa-turn-rest))) rotate(var(--aa-lean, -2deg));
   filter: drop-shadow(7px 5px 4px #0a0a0a14);
-  will-change: transform;
-  transition: transform 0.8s var(--aa-ease), filter 0.8s;
+  transition: transform var(--aa-turn-duration) var(--aa-ease), filter var(--aa-turn-duration);
 }
 
 .aa-garment-turn img {
@@ -302,6 +306,14 @@ body.dark-mono .aa-dialog {
   animation: aa-caption-in 0.3s;
 }
 
+.aa-caption-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
 .aa-rail-hints p {
   margin: 7px 0 0;
   font-size: 9px;
@@ -309,6 +321,41 @@ body.dark-mono .aa-dialog {
   letter-spacing: 0.2em;
   color: var(--aa-muted-fg);
 }
+
+.aa-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 32px;
+  margin-top: 6px !important;
+  padding: 4px 10px !important;
+  border: 1px solid var(--aa-hair) !important;
+  border-radius: 999px;
+  color: var(--aa-muted-fg) !important;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
+}
+
+.aa-sound-toggle:hover { border-color: var(--aa-fg) !important; color: var(--aa-fg) !important; }
+.aa-sound-toggle:active { transform: scale(0.97); }
+.aa-sound-toggle.is-on {
+  border-color: var(--aa-fg) !important;
+  background: var(--aa-fg) !important;
+  color: var(--aa-bg) !important;
+}
+.aa-sound-toggle:disabled { cursor: not-allowed; opacity: 0.55; }
+.aa-sound-icon { width: 14px; height: 14px; flex: 0 0 auto; }
+.aa-sound-wave { display: none; }
+.aa-sound-mute-mark { display: block; }
+.aa-sound-toggle.is-on .aa-sound-wave { display: block; }
+.aa-sound-toggle.is-on .aa-sound-mute-mark { display: none; }
 
 .aa-mobile-hint { display: none; }
 
@@ -428,7 +475,7 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
   width: min(330px, 62%);
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.85s cubic-bezier(0.25, 0.7, 0.25, 1);
+  transition: transform var(--aa-detail-turn-duration) cubic-bezier(0.25, 0.7, 0.25, 1);
 }
 
 .aa-detail-turntable.show-back { transform: rotateY(180deg); }
@@ -519,13 +566,32 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
 }
 
 @media (max-width: 900px) {
-  .aa-home-shell { --aa-turn-rest: -74deg; --aa-grow: 3.6; }
+  .aa-home-shell {
+    --aa-turn-rest: -74deg;
+    --aa-grow: 3.6;
+    --aa-open-duration: 0.375s;
+    --aa-turn-duration: 0.4s;
+    --aa-arrival-duration: 0.475s;
+    --aa-detail-turn-duration: 0.425s;
+  }
+
   .aa-rail-stage { width: 89vw; height: 300px; }
   .aa-garments { inset-inline: 20px; }
-  .aa-garment-swing { width: 218px; margin-left: -109px; }
-  
-  
-  
+  .aa-garment-swing {
+    width: 218px;
+    margin-left: -109px;
+    animation-name: aa-garment-arrive;
+    animation-delay: var(--arrival);
+    animation-duration: var(--aa-arrival-duration);
+  }
+
+  /* Promote only the garment being manipulated; ten permanent transform
+     layers are wasteful on mobile GPUs. */
+  /* No blanket GPU promotion for all ten garments on mobile. */
+  .aa-garment-turn { will-change: auto; }
+  .aa-caption-title { animation-duration: 0.15s; }
+
+  .aa-home-shell:not(.is-in-view) .aa-garment-swing { animation-play-state: paused; }
 }
 
 @media (max-width: 600px) {
@@ -542,10 +608,9 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
   .aa-rail-stage { width: 790px; height: 288px; margin: 0; }
   .aa-garments { inset-inline: 15px; }
   .aa-garment-swing { width: 220px; margin-left: -110px; }
+  .aa-caption-actions { flex-direction: column; gap: 0; }
+  .aa-sound-toggle { margin-top: 8px !important; }
 
-  
-  
-  
   .aa-desktop-hint { display: none; }
   .aa-mobile-hint { display: block; }
   
