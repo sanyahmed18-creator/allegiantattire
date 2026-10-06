@@ -2,10 +2,10 @@
 """
 Allegiant Attire — patch the built assets in place.
 
-Fixes three things in your deployed build output:
-  1. CRITICAL: removes the hardcoded admin password from the JS bundle
-  2. Swaps sanyahmed18@gmail.com -> info@allegiantattire.store everywhere
-  3. Appends blog fixes to custom.js (real links, real headings, accessible modal)
+Applies deployment-safe patches to the checked-in static output:
+  1. Removes browser-bundled admin fallbacks and fails closed without a server verifier
+  2. Removes generated product ratings and unverified homepage social-proof claims
+  3. Appends the blog-link accessibility patch when it is not already present
 
 Run from the folder that contains index.html + assets/ + custom.js:
 
@@ -18,8 +18,6 @@ import re, sys
 from pathlib import Path
 
 ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
-OLD_EMAIL = "sanyahmed18@gmail.com"
-NEW_EMAIL = "info@allegiantattire.store"
 MARKER = "/* === AA PATCH: security + email + blog (v1) === */"
 
 BLOG_FIX = r"""
@@ -151,21 +149,16 @@ FORGOT_FIX = r"""
    Adds a "FORGOT PASSWORD?" link to the ADMIN LOGIN panel that opens a
    pre-filled email to the owner's recovery address.
 
-   The address is deliberately NOT shown on screen and NOT present in
-   the page HTML or as a plain string in this file:
-     * the visible link text is only "Forgot password?"
-     * the address is assembled from fragments at click time
-   That keeps it out of email-harvesting crawlers, which is the reason
-   the site moved off a public Gmail address in the first place.
-   It only ever appears inside the admin login panel, never on a public page.
+   This is a static site and the admin editor is not server-authenticated.
+   The link is only present inside the local admin panel; it uses the public
+   business inbox rather than a personal recovery address.
    ------------------------------------------------------------------ */
 (function () {
   "use strict";
 
-  /* owner's recovery address, built from fragments so no greppable string ships */
-  var FP_USER = "sanyahmed18";
-  var FP_HOST = ["gmail", String.fromCharCode(46), "com"].join("");
-  function fpAddress() { return FP_USER + String.fromCharCode(64) + FP_HOST; }
+  /* Public support address; the admin panel itself is intentionally disabled. */
+  var FP_TO = "info@allegiantattire.store";
+  function fpAddress() { return FP_TO; }
 
   var FP_SUBJECT = "Allegiant Attire - admin login recovery";
   var FP_BODY = [
@@ -271,40 +264,13 @@ def fail(msg):
 
 
 
-# --------------------------------- 0. undo Cloudflare's email obfuscation
-# Must run before the email sweep: while the address is XOR-encoded in
-# data-cfemail, a text replace cannot see it.
-def _decode_cfemail(payload):
-    try:
-        raw = bytes.fromhex(payload); key = raw[0]
-        return "".join(chr(b ^ key) for b in raw[1:])
-    except Exception:
-        return ""
-
-cf_cleaned = 0
-for f in sorted(ROOT.rglob("*.html")):
-    t = f.read_text(encoding="utf-8"); o = t
-    # variant A: <a href="/cdn-cgi/l/email-protection#HEX">
-    t = re.sub(r'<a href="/cdn-cgi/l/email-protection#([0-9a-fA-F]+)"[^>]*>.*?</a>',
-               lambda m: (lambda e: f'<a href="mailto:{e}">{e}</a>' if e else m.group(0))(_decode_cfemail(m.group(1))),
-               t, flags=re.S)
-    # variant B: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="HEX">[email protected]</a>
-    t = re.sub(r'<a href="/cdn-cgi/l/email-protection"[^>]*data-cfemail="([0-9a-fA-F]+)"[^>]*>.*?</a>',
-               lambda m: (lambda e: f'<a href="mailto:{e}">{e}</a>' if e else m.group(0))(_decode_cfemail(m.group(1))),
-               t, flags=re.S)
-    t = re.sub(r'<span[^>]*class="__cf_email__"[^>]*data-cfemail="([0-9a-fA-F]+)"[^>]*>\s*</span>',
-               lambda m: _decode_cfemail(m.group(1)), t, flags=re.S)
-    t = re.sub(r'<script[^>]*src="/cdn-cgi/scripts/[^"]*email-decode[^"]*"[^>]*>\s*</script>', "", t, flags=re.S)
-    if t != o:
-        f.write_text(t, encoding="utf-8"); cf_cleaned += 1
-if cf_cleaned:
-    report.append((f"{cf_cleaned} html files", ["Cloudflare email obfuscation reversed (address was XOR-encoded, invisible to Google)"]))
+# The HTML in this repository already uses the public business inbox. Any
+# Cloudflare email obfuscation, redirects, or WAF behavior is configured at
+# the host/CDN and must be checked there rather than simulated in this patcher.
 
 # ------------------------------------------------- 1. every shipped .js file
-# The password lived in TWO places:
-#   assets/index-*.js :  ,l3="<password>",AA_PW=function(){...}
-#   custom.js         :  var DEFAULT_PW = "<password>"; // factory password
-# Anything that ships to the browser is public. Both have to go.
+# Any value or branch that ships to the browser is public. Remove embedded
+# defaults and fail closed unless an external, trusted verifier is configured.
 js_files = sorted(ROOT.rglob("*.js"))
 js_files = [f for f in js_files if f.name not in {"patch-build.py", "build-blog.py", "decode-cf-emails.py"}]
 if not js_files:
@@ -319,16 +285,126 @@ for b in js_files:
     changes = []
 
     # --- 1a. the bundle's hardcoded fallback -------------------------------
-    pw = re.search(r'l3="([^"]+)",AA_PW=function\(\)', src)
-    if pw:
-        src = src.replace(f'l3="{pw.group(1)}",AA_PW=function()', 'l3="",AA_PW=function()')
+    # The UI stores its edits in localStorage only; it is not a server-side CMS
+    # or authentication system. Never ship a usable default password.
+    pw = re.search(r'l3="([^"]*)",AA_PW=function\(\)', src)
+    if pw and pw.group(1):
+        src = src.replace(f'l3="{pw.group(1)}",AA_PW=function()', 'l3="",AA_PW=function()', 1)
         changes.append(f"bundle: hardcoded admin password removed ({len(pw.group(1))} chars, plain text)")
+
+    legacy_login = "(AA_PW().length>0&&c===AA_PW())||c===l3?o()"
+    if legacy_login in src:
+        src = src.replace(legacy_login, "AA_PW().length>0&&c===AA_PW()?o()", 1)
+        changes.append("bundle: removed empty-password fallback; admin login fails closed")
+
+    # Remove formula-generated star ratings / review counts, the unverified
+    # testimonial block, and public product rating rows until verified source
+    # reviews can be connected. These values were generated by index math.
+    bundle_patches = [
+        ("rating:4.5+l*7%6/10,reviews:20+l*37%200", "rating:0,reviews:0", "generated product rating/count values removed"),
+        ("VIEW ALL 240+ SKUS ", "VIEW ALL PRODUCTS ", "unverified catalog-size claim removed"),
+        ("One of the largest wholesale suppliers of blank & custom clothing in the UAE.", "Wholesale supplier of blank and custom clothing in the UAE.", "unverified market-leadership superlative removed"),
+        ('r.jsx("option",{value:"rating","data-source-loc":"src/App.tsx:490:12",children:"TOP RATED"})', "", "rating sort option removed with unsupported review data"),
+        ('[["9+","YEARS MFG"],["2.4M","PCS DELIVERED"],["1-2 DAY","UAE DELIVERY"]]', '[["2016","ESTABLISHED"],["MOQ 1","DTF PRINTING"],["1-2 DAY","UAE DELIVERY"]]', "unverified delivered-volume metric replaced with verifiable offer"),
+        ('[["2.4M+","Garments delivered"],["100%","In-house production"],["48H","Fastest bulk run"],["99.2%","QC pass rate"]]', '[["2016","ESTABLISHED"],["IN-HOUSE","PRODUCTION"],["1-2 DAY","UAE DELIVERY"],["MOQ 1","DTF PRINTING"]]', "unverified company-volume and quality metrics removed"),
+        ('[["4.9","GOOGLE RATING"],["1.9K","REVIEWS"],["98%","RE-ORDER"],["24H","RESPONSE"]]', '[["IN-HOUSE","MANUFACTURING"],["6","DECORATION METHODS"],["MOQ 1","DTF PRINTING"],["AJMAN","FACTORY LOCATION"]]', "unverified rating, review and re-order claims removed"),
+        ('r.jsx("section",{className:V("border-y-2",rt,ia),"data-source-loc":"src/App.tsx:689:6",children:', '!1&&r.jsx("section",{className:V("border-y-2",rt,ia),"data-source-loc":"src/App.tsx:689:6",children:', "unverified client logo/testimonial section removed"),
+        ('QC PASS 99.2%', 'QC CHECKS', "unverified quality percentage removed"),
+        ('[["15+","MACHINES"],["60+","STAFF"],["24H","RUSH MODE"]]', '[["CUT + SEW","IN-HOUSE"],["6","FINISH METHODS"],["MOQ 1","DTF PRINTING"]]', "unverified machine/staff/rush metrics replaced with service facts"),
+        ("r.jsxs(\"div\",{className:\"mt-1.5 flex items-center gap-2\",\"data-source-loc\":\"src/App.tsx:520:16\",children:[", "!1&&r.jsxs(\"div\",{className:\"mt-1.5 flex items-center gap-2\",\"data-source-loc\":\"src/App.tsx:520:16\",children:[", "unverified product-card stars hidden"),
+        ("r.jsxs(\"div\",{className:\"mt-2 flex items-center gap-2\",\"data-source-loc\":\"src/App.tsx:974:14\",children:[", "!1&&r.jsxs(\"div\",{className:\"mt-2 flex items-center gap-2\",\"data-source-loc\":\"src/App.tsx:974:14\",children:[", "unverified product-detail stars hidden"),
+        ("r.jsxs(\"section\",{id:\"reviews\"", "!1&&r.jsxs(\"section\",{id:\"reviews\"", "unverified review/testimonial section removed"),
+        (",{label:\"Reviews\",href:\"#reviews\"}", "", "orphan Reviews navigation item removed"),
+    ]
+    for old_patch, new_patch, label in bundle_patches:
+        if old_patch not in src:
+            continue
+        # Several patches add a short-circuit before a JSX expression. Check
+        # the complete replacement first so repeated runs stay idempotent.
+        if new_patch and new_patch in src:
+            continue
+        src = src.replace(old_patch, new_patch, 1)
+        changes.append(f"bundle: {label}")
+
+    # Normalize duplicate guards left by earlier patcher versions. Keep one
+    # false child per hidden UI block; React ignores it without rendering the
+    # unsupported section or star row.
+    hidden_jsx_targets = [
+        'r.jsxs("div",{className:"mt-1.5 flex items-center gap-2","data-source-loc":"src/App.tsx:520:16"',
+        'r.jsxs("div",{className:"mt-2 flex items-center gap-2","data-source-loc":"src/App.tsx:974:14"',
+        'r.jsx("section",{className:V("border-y-2",rt,ia),"data-source-loc":"src/App.tsx:689:6",children:',
+        'r.jsxs("section",{id:"reviews"',
+    ]
+    normalized = False
+    for target in hidden_jsx_targets:
+        src, n = re.subn(r'(?:!1&&){2,}(?=' + re.escape(target) + r')', "!1&&", src, count=1)
+        normalized = normalized or bool(n)
+    if normalized:
+        changes.append("bundle: duplicate hidden-section guards normalized")
 
     # --- 1b. custom.js's DEFAULT_PW ----------------------------------------
     dp = re.search(r'var DEFAULT_PW\s*=\s*"([^"]+)"', src)
     if dp:
         src = re.sub(r'var DEFAULT_PW\s*=\s*"[^"]*"', 'var DEFAULT_PW = ""', src)
         changes.append(f"custom.js: DEFAULT_PW factory password removed ({len(dp.group(1))} chars, plain text)")
+
+    # --- 1b1. disable client-side shared-login fallbacks -----------------
+    # The legacy sync shim once accepted a factory password or browser-local
+    # value when its optional worker was absent. A static bundle cannot verify
+    # either securely, so this path must fail closed.
+    factory = re.search(r'var FACTORY\s*=\s*"([^"]*)";', src)
+    if factory:
+        src = re.sub(r'var FACTORY\s*=\s*"[^"]*";\s*', '', src, count=1)
+    old_shared_helpers = '''  function storedLocalPw() {
+    var v = null;
+    try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
+    if (!v) return null;
+    try { return decodeURIComponent(escape(atob(v))) || atob(v); }
+    catch (e) { try { return atob(v); } catch (e2) { return null; } }
+  }
+  function localCheck(pw) {
+    var st = storedLocalPw();
+    if (st && pw === st) return true;
+    return pw === FACTORY;
+  }'''
+    safe_shared_helpers = '''  function storedLocalPw() {
+    var v = null;
+    try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
+    if (!v) return null;
+    try { return decodeURIComponent(escape(atob(v))) || atob(v); }
+    catch (e) { try { return atob(v); } catch (e2) { return null; } }
+  }
+  function localCheck(pw) {
+    return false; // Public static files have no trusted password verifier.
+  }'''
+    for helper_block in (old_shared_helpers, safe_shared_helpers):
+        if helper_block in src:
+            src = src.replace(helper_block, "", 1)
+            changes.append("custom.js: removed unused browser-local password verifier")
+            break
+    old_no_worker = '''      setTimeout(function () { localCheck(pw) ? ok() : fail("INCORRECT PASSWORD — TRY AGAIN."); }, 250);'''
+    new_no_worker = '''      setTimeout(function () { fail("ADMIN LOGIN IS DISABLED — SERVER AUTHENTICATION IS NOT CONFIGURED."); }, 0);'''
+    if old_no_worker in src:
+        src = src.replace(old_no_worker, new_no_worker, 1)
+        changes.append("custom.js: no-worker login reports that authentication is disabled")
+    old_worker_fail = '''        .catch(function () { localCheck(pw) ? ok() : fail("INCORRECT PASSWORD — TRY AGAIN."); });'''
+    new_worker_fail = '''        .catch(function () { fail("AUTHENTICATION SERVICE UNAVAILABLE — TRY AGAIN LATER."); });'''
+    if old_worker_fail in src:
+        src = src.replace(old_worker_fail, new_worker_fail, 1)
+        changes.append("custom.js: worker errors no longer fall back to local password checks")
+    old_local_change = '''      } else {
+        if (cur.value !== (storedLocalPw() || FACTORY)) { setMsg("CURRENT PASSWORD IS INCORRECT."); return; }
+        try { localStorage.setItem("aa-admin-pw-v1", btoa(unescape(encodeURIComponent(nw.value)))); } catch (e) {}
+        setMsg("PASSWORD UPDATED — THIS BROWSER ONLY (sync server not configured).", true);
+        cur.value = ""; nw.value = ""; cf.value = "";
+      }'''
+    new_local_change = '''      } else {
+        setMsg("ADMIN LOGIN IS DISABLED — SERVER AUTHENTICATION IS NOT CONFIGURED.");
+        cur.value = ""; nw.value = ""; cf.value = "";
+      }'''
+    if old_local_change in src:
+        src = src.replace(old_local_change, new_local_change, 1)
+        changes.append("custom.js: browser-local password changes disabled")
 
     # --- 1c. never let a blank password authenticate -----------------------
     # Without this, AA_PW() returns "" and an empty field would match it,
@@ -344,29 +420,9 @@ for b in js_files:
         )
         changes.append("bundle: shows why the login is closed instead of an endless retry loop")
 
-    # --- 1d. email ----------------------------------------------------------
-    n = src.count(OLD_EMAIL)
-    if n:
-        src = src.replace(OLD_EMAIL, NEW_EMAIL)
-        changes.append(f"email replaced x{n}")
-
     if src != orig:
         b.write_text(src, encoding="utf-8")
     report.append((str(b.relative_to(ROOT)), changes))
-
-# ------------------------------------------------- 2. index.html (email + JSON-LD)
-idx = ROOT / "index.html"
-if idx.exists():
-    src = idx.read_text(encoding="utf-8")
-    orig = src
-    changes = []
-    n = src.count(OLD_EMAIL)
-    if n:
-        src = src.replace(OLD_EMAIL, NEW_EMAIL)
-        changes.append(f"email replaced x{n} (includes the LocalBusiness JSON-LD)")
-    if src != orig:
-        idx.write_text(src, encoding="utf-8")
-    report.append(("index.html", changes))
 
 # ------------------------------------------------------- 3. custom.js blog fixes
 cj = ROOT / "custom.js"
@@ -374,10 +430,6 @@ if not cj.exists():
     fail("custom.js not found")
 src = cj.read_text(encoding="utf-8")
 changes = []
-n = src.count(OLD_EMAIL)
-if n:
-    src = src.replace(OLD_EMAIL, NEW_EMAIL)
-    changes.append(f"email replaced x{n}")
 
 if MARKER not in src:
     src = src.rstrip() + "\n\n" + BLOG_FIX
@@ -387,32 +439,11 @@ else:
 
 if FORGOT_MARK not in src:
     src = src.rstrip() + "\n\n" + FORGOT_FIX
-    changes.append("forgot-password link appended to the admin login panel (address not exposed in HTML)")
+    changes.append("forgot-password link appended to the admin login panel")
 else:
     changes.append("forgot-password link already present — skipped")
 cj.write_text(src, encoding="utf-8")
 report.append(("custom.js", changes))
-
-# ------------------------------------------- 4. email across every shipped file
-# The old address had already been baked into the prerendered pages and into
-# Cloudflare-obfuscated mailto links, so sweep the whole output, not just index.html.
-swept = 0
-for f in sorted(ROOT.rglob("*")):
-    if not f.is_file() or f.suffix.lower() not in {".html", ".js", ".css", ".json", ".xml", ".txt", ".webmanifest"}:
-        continue
-    if f.name in {"patch-build.py", "build-blog.py", "decode-cf-emails.py"}:
-        continue
-    try:
-        t = f.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, PermissionError):
-        continue
-    if OLD_EMAIL in t:
-        f.write_text(t.replace(OLD_EMAIL, NEW_EMAIL), encoding="utf-8")
-        swept += 1
-        report.append((str(f.relative_to(ROOT)), [f"email replaced ({OLD_EMAIL} -> {NEW_EMAIL})"]))
-if not swept:
-    report.append(("* all other files", ["no further email occurrences"]))
-
 
 # --------------------------------- 5. homepage ships two <h1> elements
 # index.html now contains a static SEO block with its own <h1>, and the React
@@ -451,4 +482,4 @@ for name, ch in report:
         print(f"    ✓ {c}")
     if not ch:
         print("    – nothing to change (already patched)")
-print("\nNow rebuild/redeploy. Verify with:  grep -c 'C00lhunter' assets/index-*.js   ->  0")
+print("\nReview the diff, validate JavaScript syntax, and confirm the generated rating/review UI stays suppressed before deployment.")

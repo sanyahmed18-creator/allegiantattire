@@ -977,7 +977,7 @@
 
   // ---- Admin panel: change password + social media links ----
   var PANEL_HEAD_LOC = "src/components/admin.tsx:163:8"; // CATALOG MANAGER header
-  var DEFAULT_PW = "allegiant2026"; // factory password (bundle fallback)
+  var DEFAULT_PW = ""; // no client-side default; login fails closed
   function currentAdminPw() {
     var v = null;
     try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
@@ -2105,24 +2105,16 @@
 
 /* === AA PATCH: forgot-password link (v1) === */
 /* ------------------------------------------------------------------
-   Adds a "FORGOT PASSWORD?" link to the ADMIN LOGIN panel that opens a
-   pre-filled email to the owner's recovery address.
-
-   The address is deliberately NOT shown on screen and NOT present in
-   the page HTML or as a plain string in this file:
-     * the visible link text is only "Forgot password?"
-     * the address is assembled from fragments at click time
-   That keeps it out of email-harvesting crawlers, which is the reason
-   the site moved off a public Gmail address in the first place.
-   It only ever appears inside the admin login panel, never on a public page.
+   Adds a support link inside the local admin panel. The static-site admin
+   editor is not server-authenticated and all edits stay in this browser's
+   localStorage; this link is not a secure account-recovery system.
    ------------------------------------------------------------------ */
 (function () {
   "use strict";
 
-  /* owner's recovery address, built from fragments so no greppable string ships */
-  var FP_USER = "sanyahmed18";
-  var FP_HOST = ["gmail", String.fromCharCode(46), "com"].join("");
-  function fpAddress() { return FP_USER + String.fromCharCode(64) + FP_HOST; }
+  /* Public support address; the admin panel itself is intentionally disabled. */
+  var FP_TO = "info@allegiantattire.store";
+  function fpAddress() { return FP_TO; }
 
   var FP_SUBJECT = "Allegiant Attire - admin login recovery";
   var FP_BODY = [
@@ -2247,20 +2239,6 @@
   }
   loadWorkerUrl();
 
-  var FACTORY = "allegiant2026";
-
-  function storedLocalPw() {
-    var v = null;
-    try { v = localStorage.getItem("aa-admin-pw-v1"); } catch (e) {}
-    if (!v) return null;
-    try { return decodeURIComponent(escape(atob(v))) || atob(v); }
-    catch (e) { try { return atob(v); } catch (e2) { return null; } }
-  }
-  function localCheck(pw) {
-    var st = storedLocalPw();
-    if (st && pw === st) return true;
-    return pw === FACTORY;
-  }
 
   /* called by the (patched) bundle login form */
   window.AA_LOGIN = function (pw, ok, fail) {
@@ -2271,9 +2249,9 @@
         body: JSON.stringify({ pw: pw })
       }).then(function (r) { return r.json(); })
         .then(function (j) { j.ok ? ok() : fail(j.msg || "INCORRECT PASSWORD — TRY AGAIN."); })
-        .catch(function () { localCheck(pw) ? ok() : fail("INCORRECT PASSWORD — TRY AGAIN."); });
+        .catch(function () { fail("AUTHENTICATION SERVICE UNAVAILABLE — TRY AGAIN LATER."); });
     } else {
-      setTimeout(function () { localCheck(pw) ? ok() : fail("INCORRECT PASSWORD — TRY AGAIN."); }, 250);
+      setTimeout(function () { fail("ADMIN LOGIN IS DISABLED — SERVER AUTHENTICATION IS NOT CONFIGURED."); }, 0);
     }
   };
 
@@ -2316,9 +2294,7 @@
           } else setMsg(j.msg || "CHANGE FAILED.");
         }).catch(function () { setMsg("SYNC SERVER NOT REACHABLE — TRY AGAIN."); });
       } else {
-        if (cur.value !== (storedLocalPw() || FACTORY)) { setMsg("CURRENT PASSWORD IS INCORRECT."); return; }
-        try { localStorage.setItem("aa-admin-pw-v1", btoa(unescape(encodeURIComponent(nw.value)))); } catch (e) {}
-        setMsg("PASSWORD UPDATED — THIS BROWSER ONLY (sync server not configured).", true);
+        setMsg("ADMIN LOGIN IS DISABLED — SERVER AUTHENTICATION IS NOT CONFIGURED.");
         cur.value = ""; nw.value = ""; cf.value = "";
       }
     });

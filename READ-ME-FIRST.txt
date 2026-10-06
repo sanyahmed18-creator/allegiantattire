@@ -1,27 +1,48 @@
-UPLOAD THESE TWO FILES — NOTHING ELSE NEEDED
-============================================
+DEPLOY GUIDE — ALLEGIANT ATTIRE SEO UPDATE
+==========================================
+Reviewed 6 October 2026. The local repository changes do not publish themselves.
 
-Your live site already has the new custom.js and blog pages.
-Two files were missed. Until they are uploaded, the admin
-password is STILL PUBLIC and the footer still shows the Gmail.
+IMPORTANT: Live fetches on the review date still showed the older React
+storefront, generated product ratings/review counts and unsupported promotional
+metrics. The live sitemap also omitted /blog/, and the live robots.txt comments
+conflicted with its actual crawler rules. These are corrected in the repository,
+but only a deployment (and the correct Cloudflare/host configuration) will
+replace the production responses.
 
-FILE 1:  index.html
-  -> upload to the ROOT of your website folder on GitHub
-     (the same place your current index.html lives).
-     GitHub will ask to replace the existing file. Say yes.
+BEFORE DEPLOYING
+1. Ask the business owner to verify the exact address/map pin, phone, public
+   inbox, hours, founding year, services, service areas, prices, MOQs, fabric
+   specifications, wash tests and all delivery/sample/production claims.
+2. Confirm whether the current robots.txt model-data/training crawler blocks
+   are the intended owner policy. Search crawlers and training/data-use bots
+   are separate choices; a CDN/WAF can still block a bot.
+3. From this repository root, run:
 
-FILE 2:  assets/index-CAFUB5Vv.js
-  -> on GitHub, open the folder called  assets
-     then Add file -> Upload files -> drop this file.
-     Same filename, same folder. Replace it.
+     ./apply-all.sh .
 
-AFTER BOTH COMMITS:
-  1. Cloudflare dashboard -> Caching -> Configuration -> Purge Everything.
-  2. Open your site in an INCOGNITO window.
-  3. The footer must show INFO@ALLEGIANTATTIRE.STORE.
-  4. Check: view-source must contain  custom.js?v=24  and
-     assets/index-CAFUB5Vv.js?v=11   (the numbers MUST be new,
-     that is what defeats the browser cache).
-  5. The password is gone for good:
-     https://allegiantattire.store/assets/index-CAFUB5Vv.js
-     must not contain  C00lhunter  (Ctrl+F to search the page source).
+   It patches the shipped JS, regenerates the blog/sitemap and validates the
+   static HTML. Expected result: 0 errors and 1 intentional screen-reader-only
+   homepage-heading warning. Also run:
+
+     node --check assets/index-CAFUB5Vv.js
+     node --check custom.js
+
+DEPLOY
+Publish the complete current site document root with your existing hosting
+workflow: root index.html, 404.html, service/about/contact/blog route folders,
+assets, custom.css/custom.js, images, videos, icons, robots.txt and sitemap.xml.
+Keep the host’s expected custom-domain/CNAME setup. Do not publish .git; helper
+scripts and audit notes are not runtime assets. .htaccess only works on a
+compatible Apache host; GitHub Pages/static hosts need equivalent edge settings.
+
+AFTER DEPLOY
+- Check the visible homepage, a service page and all five blog URLs.
+- Check /robots.txt and /sitemap.xml at the live domain.
+- Confirm no generated ratings/testimonials or unverified summary metrics appear.
+- Verify HTTPS/canonical redirects, Cloudflare WAF/CSP/cache, and email display.
+- Verify the site in Google Search Console and submit the sitemap; this is not
+  done by the repository changes. Confirm the Google Business Profile separately.
+
+These changes improve crawlability and clarity; they do not guarantee rankings,
+traffic, indexing, or AI citations. See AUDIT-REPORT.md for detail and official
+Google/OpenAI/Anthropic/Perplexity crawler references.
