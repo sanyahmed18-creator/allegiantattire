@@ -17,6 +17,13 @@
   --aa-grid: #0a0a0a12;
   --aa-shadow: rgba(128, 128, 128, 0.6);
 
+  /* brushed steel for the rail, its end brackets and the hanger wire */
+  --aa-rail-face: linear-gradient(#deded7 0%, #fdfdfb 24%, #a3a69a 54%, #d6d7cf 100%);
+  --aa-rail-edge: #c5c5bc;
+  --aa-rail-cap: linear-gradient(90deg, #cbccc3, #f7f7f4 45%, #a6a89c);
+  --aa-rail-cap-edge: #b8b9af;
+  --aa-wire: linear-gradient(90deg, #b9b9ac, #a7a895, #d5d5c8);
+
   /* Rail geometry and motion: every value below is the reference
      build's own — stage, insets, garment box, angles, easing, shares
      and delays — and the garment images were re-canvassed to its
@@ -54,6 +61,12 @@ body.dark-mono .aa-dialog {
   --aa-hair: #ffffff2b;
   --aa-grid: #ffffff12;
   --aa-shadow: rgba(255, 255, 255, 0.28);
+
+  --aa-rail-face: linear-gradient(#5d5e57 0%, #9ea099 24%, #3a3b36 54%, #6e6f68 100%);
+  --aa-rail-edge: #4a4b45;
+  --aa-rail-cap: linear-gradient(90deg, #5a5b55, #9fa09a 45%, #45463f);
+  --aa-rail-cap-edge: #52534c;
+  --aa-wire: linear-gradient(90deg, #6e6f68, #8d8e86, #55564f);
 }
 
 .aa-home-shell *,
@@ -260,16 +273,22 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   top: 0;
   left: 0;
   width: 100%;
-  height: 4px;
-  background: var(--aa-line);
+  height: 6px;
+  border: 1px solid var(--aa-rail-edge);
+  border-radius: 3px;
+  background: var(--aa-rail-face);
+  box-shadow: 0 2px 3px #0a0a0a0a;
 }
 
 .aa-metal-rail > span {
   position: absolute;
   top: -9px;
-  width: 4px;
+  width: 7px;
   height: 22px;
-  background: var(--aa-line);
+  border: 1px solid var(--aa-rail-cap-edge);
+  border-radius: 2px;
+  background: var(--aa-rail-cap);
+  box-shadow: 1px 1px 2px #0a0a0a10;
 }
 
 .aa-metal-rail > span:first-child { left: -4px; }
@@ -297,11 +316,10 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 .aa-hanger-wire {
   position: absolute;
   top: 4px;
-  left: calc(50% - 1px);
-  width: 2px;
+  left: calc(50% - 0.5px);
+  width: 1px;
   height: 31px;
-  background: var(--aa-line);
-  opacity: 0.5;
+  background: var(--aa-wire);
 }
 
 .aa-garment-swing {
@@ -344,10 +362,9 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
   bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 2px 5px;
-  border: 1px solid transparent;
   font-size: 9px;
   font-weight: 500;
+  letter-spacing: 0.18em;
   color: var(--aa-muted-fg);
   opacity: 0;
   transition: opacity 0.25s;
@@ -355,7 +372,7 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
 .aa-garment.is-active .aa-garment-index,
 .aa-garment:hover .aa-garment-index,
-.aa-garment:focus-visible .aa-garment-index { opacity: 1; }
+.aa-garment:focus-visible .aa-garment-index { opacity: 0.8; }
 
 /* --- active garment: faces you, the rail accordions open --- */
 .aa-garment.is-active {
@@ -370,12 +387,6 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 }
 
 .aa-garment.is-active .aa-garment-swing { animation-play-state: running, paused; }
-
-.aa-garment.is-active .aa-garment-index {
-  background: var(--aa-fg);
-  border-color: var(--aa-fg);
-  color: var(--aa-bg);
-}
 
 /* The same single hover state in pure CSS, so the rail reacts on the
    very first hover — before, or entirely without, the script. */
@@ -395,13 +406,6 @@ body.dark-mono .aa-brand-home img { filter: invert(1) hue-rotate(180deg); }
 
   .aa-garment:hover .aa-garment-swing,
   .aa-garment:focus-visible .aa-garment-swing { animation-play-state: running, paused; }
-
-  .aa-garment:hover .aa-garment-index,
-  .aa-garment:focus-visible .aa-garment-index {
-    background: var(--aa-fg);
-    border-color: var(--aa-fg);
-    color: var(--aa-bg);
-  }
 }
 
 /* ---------------- caption + actions ---------------- */
@@ -875,13 +879,16 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
   .aa-detail-bottom { justify-content: center; gap: 10px; }
 }
 
+/* Reduced motion stills the ambient loops — the idle sway, the drop-in
+   and the marquee — but the rail must still turn and open, because that
+   IS the interface. Killing every transition here left the whole hero
+   frozen for anyone with Windows 'animation effects' switched off. */
 @media (prefers-reduced-motion: reduce) {
-  .aa-home-shell *,
-  .aa-home-shell *::before,
-  .aa-home-shell *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .aa-garment-swing,
+  .aa-marquee-track,
+  .aa-caption-title {
+    animation: none !important;
   }
+
+  .aa-home-shell { scroll-behavior: auto !important; }
 }
