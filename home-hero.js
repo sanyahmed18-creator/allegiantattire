@@ -8,7 +8,7 @@
      • touch: the rail scrolls horizontally and whatever sits nearest
        the middle becomes active
      • click/Enter: opens the garment dialog (turntable + details)
-     • finally, the band is moved into the storefront, under the marquee
+     • finally, the band is moved under the storefront hero
 
    Authored outside #root, so React hydration cannot wipe it.
    ============================================================ */
@@ -27,7 +27,6 @@
     var hintWrap = shell.querySelector(".aa-rail-hints");
     if (!garments.length) return;
 
-    var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
     /* ---------- staggered arrival + idle sway, as in the reference ---------- */
     garments.forEach(function (el, i) {
@@ -65,22 +64,24 @@
       }
     }
 
-    if (finePointer) {
-      var stage = shell.querySelector(".aa-garments");
+    /* The reference model: enter a garment to make it the active one,
+       leave the rail to let them all hang back. These are bound on
+       every device — a touchscreen laptop reports pointer:coarse even
+       when a mouse is plugged in, and gating on that left the rail
+       completely inert for anyone hovering it. */
+    var stage = shell.querySelector(".aa-garments");
 
-      /* exactly the reference model: enter a garment to make it the
-         active one, leave the rail to let them all hang back */
-      garments.forEach(function (el, i) {
-        el.addEventListener("mouseenter", function () { activate(i); });
-        el.addEventListener("focus", function () { activate(i); });
-        el.addEventListener("blur", function () { activate(-1); });
-      });
+    garments.forEach(function (el, i) {
+      el.addEventListener("mouseenter", function () { activate(i); });
+      el.addEventListener("pointerenter", function () { activate(i); });
+      el.addEventListener("focus", function () { activate(i); });
+      el.addEventListener("blur", function () { activate(-1); });
+    });
 
-      if (stage) stage.addEventListener("mouseleave", function () { activate(-1); });
-    }
+    if (stage) stage.addEventListener("mouseleave", function () { activate(-1); });
 
-    /* ---------- touch: the centred garment is the active one ---------- */
-    if (!finePointer && scroller) {
+    /* ---------- a scrollable rail activates whatever is centred ---------- */
+    if (scroller) {
       var ticking = false;
       var centreScan = function () {
         var box = scroller.getBoundingClientRect();
@@ -99,8 +100,14 @@
         ticking = true;
         window.requestAnimationFrame(centreScan);
       }, { passive: true });
-      window.addEventListener("resize", centreScan);
-      window.setTimeout(centreScan, 80);
+      window.addEventListener("resize", function () {
+        if (scroller.scrollWidth > scroller.clientWidth + 4) centreScan();
+      });
+      // only pick a garment for the reader when the rail really does
+      // scroll (narrow screens); on a full-width rail, leave it at rest
+      window.setTimeout(function () {
+        if (scroller.scrollWidth > scroller.clientWidth + 4) centreScan();
+      }, 120);
     }
 
     /* ---------- garment dialog ---------- */
@@ -193,7 +200,7 @@
 
     /* ---------- hold the motion until the band is on screen ---------- */
     revealOnScroll(shell, function () {
-      if (!finePointer || active !== -1) return;
+      if (active !== -1) return;
       /* one unprompted turn after the garments have dropped in, so the
          "hover to turn" invitation is demonstrated rather than stated */
       window.setTimeout(function () {
@@ -228,8 +235,9 @@
 
   /* The rail is authored in the page source (so it is in the HTML a
      crawler sees) but it belongs further down the page, directly under
-     the storefront's running marquee. React paints that marquee after
-     us, so watch for it, then move the band into place and reveal it.
+     the storefront's hero, just above the running marquee. React paints
+     that marquee after us, so watch for it, then move the band into
+     place and reveal it.
      Moving a node keeps its listeners, so the rail is live either way. */
   function placeRail(shell) {
     var MARQUEE = '#root [data-source-loc="src/components/ui.tsx:27:4"]';
@@ -239,8 +247,8 @@
     function seat() {
       var marquee = document.querySelector(MARQUEE);
       if (marquee && marquee.parentNode) {
-        if (shell.previousElementSibling !== marquee) {
-          marquee.parentNode.insertBefore(shell, marquee.nextSibling);
+        if (shell.nextElementSibling !== marquee) {
+          marquee.parentNode.insertBefore(shell, marquee);
         }
         anchor = marquee;
         shell.hidden = false;
@@ -278,8 +286,8 @@
       var checks = 0;
       var timer = window.setInterval(function () {
         if (++checks > 10) return window.clearInterval(timer);
-        if (anchor && anchor.parentNode && shell.previousElementSibling !== anchor) {
-          anchor.parentNode.insertBefore(shell, anchor.nextSibling);
+        if (anchor && anchor.parentNode && shell.nextElementSibling !== anchor) {
+          anchor.parentNode.insertBefore(shell, anchor);
         }
       }, 700);
     }

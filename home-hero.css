@@ -37,7 +37,7 @@
   position: relative;
   z-index: 1;
   display: block;
-  border-bottom: 2px solid var(--aa-line);
+  border-top: 2px solid var(--aa-line);
   background-color: var(--aa-bg);
   background-image:
     linear-gradient(90deg, var(--aa-grid) 1px, transparent 1px),
@@ -191,6 +191,7 @@ body.dark-mono .aa-dialog {
   --arrival: 0ms;
   --sway: 0s;
   transform-origin: 50% 0;
+  transform-style: preserve-3d;
   animation: aa-garment-arrive 0.95s cubic-bezier(0.16, 1, 0.3, 1) both,
              aa-gentle-sway 6s ease-in-out infinite;
   animation-delay: var(--arrival), var(--sway);
@@ -242,6 +243,7 @@ body.dark-mono .aa-dialog {
 }
 
 .aa-garment.is-active .aa-garment-turn {
+  transform: rotateY(0deg) rotate(0deg);
   filter: drop-shadow(7px 7px 5px #0a0a0a1f);
 }
 
@@ -258,7 +260,7 @@ body.dark-mono .aa-dialog {
 
 /* The same single hover state in pure CSS, so the rail reacts on the
    very first hover — before, or entirely without, the script. */
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) {
   .aa-garment:hover,
   .aa-garment:focus-visible {
     z-index: 3;
@@ -269,6 +271,7 @@ body.dark-mono .aa-dialog {
 
   .aa-garment:hover .aa-garment-turn,
   .aa-garment:focus-visible .aa-garment-turn {
+    transform: rotateY(0deg) rotate(0deg);
     filter: drop-shadow(7px 7px 5px #0a0a0a1f);
   }
 
