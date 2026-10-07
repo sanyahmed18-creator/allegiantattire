@@ -22,6 +22,15 @@ The homepage opens with a full-viewport garment rail, recreated from the referen
 
 To change a garment: add the keyed `.webp` to `images/rail/`, then edit the `ITEMS` list used to build the rail markup in `index.html` (keep `alt`, `width` and `height` — the SEO validator requires them).
 
+## Deploying — pull requests publish the site
+
+`.github/workflows/pages.yml` publishes this repository to GitHub Pages:
+
+- **Every pull request to `main`** runs the checks — asset patches, blog/sitemap regeneration, JavaScript syntax checks and the SEO validator — and publishes nothing, so a change is verified before it can go live.
+- **Merging a pull request into `main`** (or pushing to `main` directly, or running the workflow by hand) deploys the site automatically. Whatever lands on `main` is live at <https://allegiantattire.store/> as soon as the workflow finishes — no manual upload step.
+
+The workflow stages the deployable document root (HTML routes, assets, images, videos, icons, `custom.css`/`custom.js`, `home-hero.*`, `robots.txt`, `sitemap.xml`, `CNAME`); helper scripts and audit documents are not published. GitHub Pages must be set to deploy from **GitHub Actions** (repository Settings → Pages → Build and deployment → Source) for this workflow to publish.
+
 ## Run the deployment checks
 
 From the repository root:
