@@ -312,6 +312,49 @@ body.dark-mono .aa-dialog {
 
 .aa-mobile-hint { display: none; }
 
+/* Hovering plays a sound, so there has to be a way to stop it. Kept
+   at hint size and revealed by the script, so it never appears on a
+   browser that cannot synthesise the rail anyway. */
+.aa-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  padding: 3px 10px;
+  border: 1px solid var(--aa-hair);
+  border-radius: 999px;
+  background: none;
+  color: var(--aa-muted-fg);
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+/* a class selector outranks the UA rule for [hidden] */
+.aa-sound-toggle[hidden] { display: none; }
+
+.aa-sound-toggle:hover,
+.aa-sound-toggle:focus-visible { color: var(--aa-fg); border-color: var(--aa-line); }
+
+.aa-sound-icon { width: 14px; height: 10.5px; flex: none; }
+.aa-sound-cone { fill: currentColor; }
+
+.aa-sound-wave,
+.aa-sound-slash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.aa-sound-slash { display: none; }
+.aa-sound-toggle.is-off .aa-sound-wave { display: none; }
+.aa-sound-toggle.is-off .aa-sound-slash { display: block; }
+
 /* ---------------- footer ---------------- */
 
 /* ---------------- dialogs ---------------- */
@@ -523,6 +566,30 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
   .aa-rail-stage { width: 89vw; height: 300px; }
   .aa-garments { inset-inline: 20px; }
   .aa-garment-swing { width: 218px; margin-left: -109px; }
+
+  /* Phones answer a swipe instead of a hover, so the rail has to keep
+     up with a moving finger. Ten promoted layers each carrying a
+     drop-shadow and an endless sway is more than a phone GPU wants to
+     repaint every frame, and the desktop timings then land the turn
+     almost a second after the thumb has moved on. So: no ambient
+     loop, no permanent layer promotion, shadow only on the garment
+     being looked at, and the turn and the accordion roughly halved. */
+  .aa-garment { transition: flex-grow 0.36s var(--aa-ease); }
+
+  .aa-garment-swing {
+    animation: aa-garment-arrive 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--arrival);
+  }
+
+  .aa-garment-turn {
+    will-change: auto;
+    filter: none;
+    transition: transform 0.4s var(--aa-ease), filter 0.4s;
+  }
+
+  .aa-garment.is-active .aa-garment-turn {
+    filter: drop-shadow(5px 5px 4px #0a0a0a1a);
+  }
   
   
   
