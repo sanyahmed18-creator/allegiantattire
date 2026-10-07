@@ -36,6 +36,13 @@
 
   position: relative;
   z-index: 1;
+  /* The rail lives inside the storefront hero's text column, and each
+     garment swing is an absolutely positioned box a little wider than
+     its flex item. Clipping at the shell keeps those boxes from ever
+     spilling out of the column (or off the page) at any width; every
+     visible pixel of a garment stays inside the stage, so nothing is
+     ever cut off. */
+  overflow-x: clip;
   display: block;
   color: var(--aa-fg);
   font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
@@ -556,10 +563,16 @@ body.dark-mono .aa-dialog::backdrop { background: #000000b8; }
 @keyframes aa-caption-in { 0% { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ---------------- breakpoints ---------------- */
-@media (min-width: 1600px) {
-  .aa-rail-stage { width: 1250px; height: 400px; }
-  .aa-garment-swing { width: 315px; margin-left: -157.5px; }
-}
+
+/* Deliberately no min-width:1600px override. The reference build's
+   fixed 1250px stage only fitted while this band ran the full viewport
+   width; the rail now sits inside the storefront hero's seven-column
+   text block (capped at ~715px by max-w-7xl), so on large desktops the
+   fixed stage burst out of its column, across the grid gap and straight
+   over the hero image beside it — the rail bar and the outer garments
+   painted on top of the photo. The cqw sizing above already scales the
+   whole rail to whatever width the column ends up, so the stage simply
+   follows its column at every width. */
 
 @media (max-width: 900px) {
   .aa-home-shell { --aa-turn-rest: -74deg; --aa-grow: 3.6; }

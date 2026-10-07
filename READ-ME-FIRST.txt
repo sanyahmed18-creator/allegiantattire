@@ -28,8 +28,14 @@ BEFORE DEPLOYING
      node --check custom.js
 
 DEPLOY
-Publish the complete current site document root with your existing hosting
-workflow: root index.html, 404.html, service/about/contact/blog route folders,
+Automated (recommended): merging a pull request to `main` now publishes the
+site automatically via .github/workflows/pages.yml (GitHub Pages, source
+"GitHub Actions"). Every pull request first runs the checks in that workflow
+and publishes nothing until it is merged.
+
+Manual (still works): publish the complete current site document root with
+your existing hosting workflow: root index.html, 404.html,
+service/about/contact/blog route folders,
 assets, custom.css/custom.js, images, videos, icons, robots.txt and sitemap.xml.
 Keep the host’s expected custom-domain/CNAME setup. Do not publish .git; helper
 scripts and audit notes are not runtime assets. .htaccess only works on a

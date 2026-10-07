@@ -314,8 +314,26 @@
       last = now;
 
       build();
-      if (ctx.state === "suspended" && ctx.resume) ctx.resume();
-      if (ctx.state !== "running") return;      // no gesture yet, stay silent
+      if (ctx.state !== "running") {
+        /* Browsers hold audio until the reader has interacted with the
+           page, and ctx.resume() only takes effect asynchronously — so
+           testing the state right after calling resume() always saw
+           "suspended" and silently dropped the swoosh. That is why the
+           rail stayed mute until the sound toggle had been flipped off
+           and on again: the click that unlocked the audio was itself
+           swallowed. Chain this swoosh onto the resume instead — the
+           very first tap, click or keypress that unlocks the audio is
+           also the first one you hear, and from then on hovering the
+           rail just works. Without a gesture the promise never resolves
+           and the rail stays silent, which is exactly the autoplay
+           policy. */
+        if (ctx.resume) {
+          ctx.resume().then(function () {
+            if (!muted && ctx && ctx.state === "running") play(slot, level);
+          }, function () {});
+        }
+        return;                               // no gesture yet, stay silent
+      }
 
       var t = ctx.currentTime;
       var gain = (crowded ? 0.5 : 1) * (level == null ? 1 : level);
