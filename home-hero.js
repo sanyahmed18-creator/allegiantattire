@@ -46,10 +46,12 @@
     }
 
     var active = -1;
+    var sound = createRailSound();
 
-    function activate(index) {
+    function activate(index, silent) {
       if (index === active) return;
       active = index;
+      if (index !== -1 && !silent) sound.play(index);
 
       garments.forEach(function (el, i) {
         el.classList.toggle("is-active", i === index);
@@ -83,7 +85,8 @@
     /* ---------- a scrollable rail activates whatever is centred ---------- */
     if (scroller) {
       var ticking = false;
-      var centreScan = function () {
+      var lastLeft = -1;
+      var centreScan = function (silent) {
         var box = scroller.getBoundingClientRect();
         var centre = box.left + box.width / 2;
         var best = 0, bestDist = Infinity;
@@ -92,21 +95,39 @@
           var d = Math.abs(r.left + r.width / 2 - centre);
           if (d < bestDist) { bestDist = d; best = i; }
         });
-        activate(best);
+        activate(best, silent === true);
         ticking = false;
       };
-      scroller.addEventListener("scroll", function () {
+      var queueScan = function () {
         if (ticking) return;
         ticking = true;
         window.requestAnimationFrame(centreScan);
+      };
+      scroller.addEventListener("scroll", function () {
+        // a scroll of a pixel or two cannot change which garment is
+        // centred, so skip the ten getBoundingClientRect calls
+        if (Math.abs(scroller.scrollLeft - lastLeft) < 3) return;
+        lastLeft = scroller.scrollLeft;
+        queueScan();
       }, { passive: true });
+
+      // follow the finger rather than waiting for the scroll to settle
+      scroller.addEventListener("touchmove", queueScan, { passive: true });
+
+      /* touching a garment turns it at once — without this the rail
+         only ever answered the scroll, so a tap felt like it had been
+         ignored right up until the dialog appeared */
+      garments.forEach(function (el, i) {
+        el.addEventListener("touchstart", function () { activate(i); }, { passive: true });
+        el.addEventListener("pointerdown", function () { activate(i); });
+      });
       window.addEventListener("resize", function () {
         if (scroller.scrollWidth > scroller.clientWidth + 4) centreScan();
       });
       // only pick a garment for the reader when the rail really does
       // scroll (narrow screens); on a full-width rail, leave it at rest
       window.setTimeout(function () {
-        if (scroller.scrollWidth > scroller.clientWidth + 4) centreScan();
+        if (scroller.scrollWidth > scroller.clientWidth + 4) centreScan(true);
       }, 120);
     }
 
@@ -198,6 +219,20 @@
       });
     });
 
+    /* ---------- the sound toggle ---------- */
+    var soundBtn = shell.querySelector("[data-aa-sound]");
+    if (soundBtn && sound.supported) {
+      var paintSound = function () {
+        var on = sound.enabled();
+        soundBtn.classList.toggle("is-off", !on);
+        soundBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        soundBtn.querySelector(".aa-sound-text").textContent = on ? "Rail sound on" : "Rail sound off";
+      };
+      soundBtn.hidden = false;
+      paintSound();
+      soundBtn.addEventListener("click", function () { sound.toggle(); paintSound(); });
+    }
+
     /* ---------- hold the motion until the band is on screen ---------- */
     revealOnScroll(shell, function () {
       if (active !== -1) return;
@@ -205,13 +240,147 @@
          "hover to turn" invitation is demonstrated rather than stated */
       window.setTimeout(function () {
         if (active !== -1) return;
-        activate(Math.min(4, garments.length - 1));
+        activate(Math.min(4, garments.length - 1), true);
         window.setTimeout(function () { if (active === Math.min(4, garments.length - 1)) activate(-1); }, 1400);
       }, 1500);
     });
 
     /* ---------- lift the rail into the storefront ---------- */
     placeRail(shell);
+  }
+
+  /* ------------------------------------------------------------------
+     The rail makes a sound: the swoop of a garment being pushed along
+     it. Synthesised with the Web Audio API rather than played from a
+     file, because a swoosh of cloth is really one thing — a band of
+     air noise that rises as the garment accelerates and falls away as
+     it settles. So it is a pink-ish noise bed through a bandpass that
+     arcs up and back down, shaped by a soft swell with no attack
+     click. Rate, filter arc and length are randomised per hover, and
+     the sound is panned to wherever the garment sits on the rail, so
+     sweeping it never sounds like the same clip ten times.
+     ------------------------------------------------------------------ */
+  function createRailSound() {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    var off = { play: function () {}, toggle: function () { return false; }, enabled: function () { return false; }, supported: false };
+    if (!Ctx) return off;
+
+    var muted = false;
+    try { muted = window.localStorage.getItem("aa-rail-sound") === "off"; } catch (e) {}
+
+    var ctx = null, noise = null, master = null, last = 0, pending = 0;
+
+    function build() {
+      if (ctx) return;
+      ctx = new Ctx();
+      master = ctx.createGain();
+      master.gain.value = 0.85;
+      master.connect(ctx.destination);
+      // pink-ish noise: cloth is broadband but weighted to the low mids,
+      // and plain white noise swooshes sound like radio static
+      var len = Math.floor(ctx.sampleRate * 1.2);
+      noise = ctx.createBuffer(1, len, ctx.sampleRate);
+      var data = noise.getChannelData(0);
+      var lp = 0;
+      for (var i = 0; i < len; i++) {
+        var white = Math.random() * 2 - 1;
+        lp = lp * 0.94 + white * 0.06;
+        var v = lp * 3.4 + white * 0.22;
+        data[i] = v > 1 ? 1 : v < -1 ? -1 : v;
+      }
+    }
+
+    // browsers hold audio until the page has been interacted with
+    ["pointerdown", "keydown", "touchstart"].forEach(function (evt) {
+      document.addEventListener(evt, function unlock() {
+        build();
+        if (ctx.state === "suspended") ctx.resume();
+      }, { once: true, passive: true });
+    });
+
+    function play(slot, level) {
+      if (muted) return;
+      var now = Date.now();
+      if (now - last < 70) {
+        /* the pointer is sweeping the rail. Don't machine-gun one
+           sound per garment, but do make sure whatever it settles on
+           is still heard, a little softer. */
+        window.clearTimeout(pending);
+        pending = window.setTimeout(function () { play(slot, 0.5); }, 80 - (now - last));
+        return;
+      }
+      window.clearTimeout(pending);
+      var crowded = now - last < 230;           // a quick one is a lighter touch
+      last = now;
+
+      build();
+      if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+      if (ctx.state !== "running") return;      // no gesture yet, stay silent
+
+      var t = ctx.currentTime;
+      var gain = (crowded ? 0.5 : 1) * (level == null ? 1 : level);
+      var slots = 10;
+      var place = (((slot || 0) % slots) / (slots - 1)) * 2 - 1;      // -1 left .. +1 right
+      var dur = 0.3 + Math.random() * 0.12;
+      var peakAt = t + dur * 0.42;                                    // the swell, not the start
+
+      var src = ctx.createBufferSource();
+      src.buffer = noise;
+      src.playbackRate.value = 0.92 + Math.random() * 0.22;
+      src.loop = true;
+
+      /* the arc: air opening up as the garment is pushed, then
+         closing again as it slows */
+      var band = ctx.createBiquadFilter();
+      band.type = "bandpass";
+      band.Q.value = 0.85;
+      var low = 380 + Math.random() * 90;
+      var high = (1500 + Math.random() * 420) * (1 - place * 0.06);
+      band.frequency.setValueAtTime(low, t);
+      band.frequency.exponentialRampToValueAtTime(high, peakAt);
+      band.frequency.exponentialRampToValueAtTime(low * 1.5, t + dur);
+
+      // keep the rumble and the hiss out of it
+      var hp = ctx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.value = 190;
+      var lpf = ctx.createBiquadFilter();
+      lpf.type = "lowpass";
+      lpf.frequency.value = 3600;
+
+      /* a swell rather than a hit — linear in, exponential out, so
+         there is no click at either end */
+      var env = ctx.createGain();
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.linearRampToValueAtTime(0.26 * gain, peakAt);
+      env.gain.linearRampToValueAtTime(0.085 * gain, peakAt + (dur - peakAt) * 0.45);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+      var tail = env;
+      if (ctx.createStereoPanner) {
+        var pan = ctx.createStereoPanner();
+        pan.pan.value = place * 0.55;        // it swooshes where the garment hangs
+        env.connect(pan);
+        tail = pan;
+      }
+
+      src.connect(band); band.connect(hp); hp.connect(lpf); lpf.connect(env);
+      tail.connect(master);
+      src.start(t, Math.random() * 0.6);
+      src.stop(t + dur + 0.05);
+    }
+
+    return {
+      play: play,
+      enabled: function () { return !muted; },
+      toggle: function () {
+        muted = !muted;
+        try { window.localStorage.setItem("aa-rail-sound", muted ? "off" : "on"); } catch (e) {}
+        if (!muted) { last = 0; play(2, 1); }
+        return !muted;
+      },
+      supported: true
+    };
   }
 
   /* The drop-in and the idle sway are paused in CSS until .is-in-view
