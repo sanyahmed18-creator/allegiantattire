@@ -17,3 +17,6 @@
 
 # No directory listings
 Options -Indexes
+
+# Serve the branded not-found page on Apache-compatible hosts.
+ErrorDocument 404 /404.html

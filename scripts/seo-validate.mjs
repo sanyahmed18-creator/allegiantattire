@@ -126,12 +126,67 @@ for (const file of htmlFiles) {
     if (!existsSync(target) && !existsSync(target2)) fail(`internal link 404s: ${href}`);
   }
 
+  if (/class="aa-pagefoot"/.test(h) && !/class="aa-legal-links"/.test(h)) {
+    fail("static page footer is missing Privacy and Terms links");
+  }
+  if (rel === "index.html") {
+    for (const href of ["/vinyl-printing-dubai/", "/privacy/", "/terms/"]) {
+      if (!h.includes(`href="${href}"`)) fail(`homepage sitemap footer is missing ${href}`);
+    }
+  }
+
   const words = (h.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ").match(/\S+/g) || []).length;
   if (words < 250 && !/contact|404/.test(rel)) {
     if (/<div id="root">\s*<\/div>/.test(h)) warn(`only ${words} words of static HTML — this is the blank SPA shell; prerender it (scripts/prerender-seo-pages.mjs)`);
     else warn(`only ${words} words — thin content, expand to 400+`);
   }
 }
+
+/* The React app footer is rendered from the minified bundle, not the static
+   HTML. Validate its real destinations so an accidental `#top` regression is
+   caught before deploy. Also guard against the client-only checkout claiming
+   an order was submitted when it only prepares a WhatsApp draft. */
+const assetsDir = join(dist, "assets");
+if (!existsSync(assetsDir)) errors.push("assets: missing folder");
+else {
+  const bundles = readdirSync(assetsDir).filter((name) => name.startsWith("index-") && name.endsWith(".js"));
+  if (!bundles.length) errors.push("assets: no index-*.js app bundle found");
+  for (const name of bundles) {
+    const bundle = readFileSync(join(assetsDir, name), "utf8");
+    const start = bundle.indexOf("SHOP|T-Shirts|Polo Shirts");
+    const end = start >= 0 ? bundle.indexOf('"src/App.tsx:875:8"', start) : -1;
+    if (start < 0 || end < 0) {
+      errors.push(`${name}: could not locate compiled React footer for destination checks`);
+      continue;
+    }
+    const footer = bundle.slice(start, end);
+    for (const href of [
+      "/custom-t-shirts-dubai/", "/custom-polo-shirts-dubai/", "/custom-hoodies-dubai/",
+      "/custom-caps-dubai/", "/activewear-manufacturer-uae/", "/school-uniforms-uae/",
+      "/dtf-printing-dubai/", "/screen-printing-dubai/", "/embroidery-services-dubai/",
+      "/vinyl-printing-dubai/", "/private-label-clothing-uae/", "/about-us/", "/blog/",
+      "/contact/", "/privacy/", "/terms/"
+    ]) if (!footer.includes(href)) errors.push(`${name}: React footer has no destination for ${href}`);
+    for (const label of ["DTF Printing", "Screen Printing", "Sublimation", "Embroidery", "Vinyl", "Labelling", "About us", "Blogs", "Contact Us", "Privacy", "Terms", "Order Support"]) {
+      if (!footer.includes(label)) errors.push(`${name}: React footer is missing the ${label} item`);
+    }
+    if (footer.includes('href:"#top"')) errors.push(`${name}: React footer still sends links to #top`);
+    if (footer.includes("My Account")) errors.push(`${name}: unsupported My Account link is still in the React footer`);
+    if (!footer.includes("Order Support")) errors.push(`${name}: Contact Us support item is missing from the React footer`);
+    if (bundle.includes('onSubmit:A=>{A.preventDefault(),lt(!0),R([])}')) {
+      errors.push(`${name}: checkout still fakes a successful order and clears the bag`);
+    }
+    if (bundle.includes("ORDER LOCKED IN.")) errors.push(`${name}: false ORDER LOCKED IN checkout success remains`);
+  }
+}
+
+const uxFile = join(dist, "site-ux.js");
+if (existsSync(uxFile)) {
+  const ux = readFileSync(uxFile, "utf8");
+  for (const feature of ["ORDER_FORM_LOC", "function submitCheckout", "Open WhatsApp order draft"]) {
+    if (!ux.includes(feature)) errors.push(`site-ux.js: missing honest checkout flow (${feature})`);
+  }
+} else errors.push("site-ux.js: missing checkout/navigation UX script");
 
 /* sitemap */
 const sitemapPath = join(dist, "sitemap.xml");

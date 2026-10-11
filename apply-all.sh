@@ -18,6 +18,7 @@ python3 "$HERE/scripts/build-blog.py" "$DIR"
 echo
 echo "=== 3/4 check JavaScript syntax ==="
 node --check "$DIR/custom.js"
+node --check "$DIR/site-ux.js"
 found_bundle=0
 for bundle in "$DIR"/assets/index-*.js; do
   [[ -f "$bundle" ]] || continue
