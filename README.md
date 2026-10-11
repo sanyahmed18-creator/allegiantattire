@@ -16,6 +16,8 @@
 The homepage opens with a full-viewport garment rail, recreated from the reference build the owner supplied (layout, sizing, easings, keyframes and breakpoints all mirror it; copy, products and links are Allegiant Attire's).
 
 - `home-hero.css` / `home-hero.js` — styles and behaviour. Every selector is prefixed `.aa-` and scoped to `.aa-home-shell`, so nothing collides with the React bundle, `custom.css` or `custom.js`.
+- `site-ux.js` — accessible mobile-menu state, live copyright year, valid footer destinations, and honest quote/order/newsletter feedback. Since the site has no form backend, quote and order requests open a prefilled WhatsApp draft and price-list requests open an email draft; visitors must press Send to submit.
+- `/privacy/` and `/terms/` describe the current static site, including analytics providers, local browser storage and the WhatsApp order-draft flow. Have the business owner verify legal wording and provider retention details, and revisit these pages if data collection or vendors change.
 - Markup lives in `index.html` **outside** `#root`, so React hydration can never wipe it. `<div id="aa-storefront"></div>` is the scroll target for the hero's *Shop* / *Explore* links.
 - How it behaves: garments hang edge-on (`rotateY(-69deg)`) and turn to face you when active (`rotateY(0)`, 0.8s `cubic-bezier(.2,.8,.2,1)`), while the rail accordions open around them (`flex-grow:3.05`). Pointer devices activate on hover/focus; touch devices scroll-snap the rail and activate whatever sits nearest the middle. Clicking opens the garment dialog (turntable, prev/next, product link, WhatsApp quote). Menu and About dialogs use native `<dialog>`.
 - `images/rail/*.webp` — garments shot on a chroma-key background and keyed to transparency, so they can turn in 3D without a photo box around them. Canvas is a shared 648 × 911 (the reference build’s 640 × 900 proportion) with the hanger hook at the top edge, which is what keeps every garment hanging on the same line at the same scale. Six garments have a matching `-back.webp`, which is what turns on the Front/Back turntable inside the garment dialog.
@@ -29,7 +31,7 @@ To change a garment: add the keyed `.webp` to `images/rail/`, then edit the `ITE
 - **Every pull request to `main`** runs the checks — asset patches, blog/sitemap regeneration, JavaScript syntax checks and the SEO validator — and publishes nothing, so a change is verified before it can go live.
 - **Merging a pull request into `main`** (or pushing to `main` directly, or running the workflow by hand) deploys the site automatically. Whatever lands on `main` is live at <https://allegiantattire.store/> as soon as the workflow finishes — no manual upload step.
 
-The workflow stages the deployable document root (HTML routes, assets, images, videos, icons, `custom.css`/`custom.js`, `home-hero.*`, `robots.txt`, `sitemap.xml`, `CNAME`); helper scripts and audit documents are not published. GitHub Pages must be set to deploy from **GitHub Actions** (repository Settings → Pages → Build and deployment → Source) for this workflow to publish.
+The workflow stages the deployable document root (HTML routes, assets, images, videos, icons, `custom.css`/`custom.js`, `home-hero.*`, `site-ux.js`, `robots.txt`, `sitemap.xml`, `CNAME`); helper scripts and audit documents are not published. GitHub Pages must be set to deploy from **GitHub Actions** (repository Settings → Pages → Build and deployment → Source) for this workflow to publish.
 
 ## Run the deployment checks
 
@@ -39,6 +41,7 @@ From the repository root:
 ./apply-all.sh .
 node --check assets/index-CAFUB5Vv.js
 node --check custom.js
+node --check site-ux.js
 ```
 
 `apply-all.sh` patches the current shipped bundle, regenerates the blog and sitemap, syntax-checks `custom.js` and the bundle, and runs the SEO validator. The current expected validator result is **0 errors, 1 warning**: the static homepage contains an intentionally screen-reader-only `<h1>` alongside the app’s rendered heading. The script validates local files; it does not publish them or test Search Console, CDN headers, redirects, WAF rules, or indexing.

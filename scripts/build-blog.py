@@ -237,7 +237,8 @@ def page(post):
   <meta name="twitter:description" content="{esc(desc)}" />
   <meta name="twitter:image" content="{BIZ['url'].rstrip('/')}{HERO[post['id']]}" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
-  <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
   <script type="application/ld+json">
 {json.dumps(ld, indent=2, ensure_ascii=False)}
   </script>
@@ -288,9 +289,12 @@ def page(post):
       <p>{esc(BIZ['address'])} · {esc(BIZ['hours'])}</p>
       <p><a href="tel:{esc(BIZ['phone'])}">{esc(BIZ['phoneDisplay'])}</a> · <a href="mailto:{esc(BIZ['email'])}">{esc(BIZ['email'])}</a></p>
       <p><a href="/blog/">All guides</a> · <a href="/">Back to {esc(BIZ['name'])}</a></p>
+      <nav class="aa-legal-links" aria-label="Legal information"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+      <p class="aa-copyright">© <span data-aa-year>{date.today().year}</span> {esc(BIZ['name'])}. All rights reserved.</p>
     </footer>
   </main>
 </div>
+<script src="/site-ux.js?v=4" defer></script>
 </body>
 </html>
 """
@@ -330,6 +334,8 @@ def index_page():
   <meta name="twitter:description" content="Practical garment manufacturing guides: print methods, fabric weights, sizing curves and how to vet a bulk supplier." />
   <meta name="twitter:image" content="{BIZ['url'].rstrip('/')}/images/og-cover-1200x630.jpg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
   <script type="application/ld+json">
 {json.dumps(ld, indent=2, ensure_ascii=False)}
   </script>
@@ -364,9 +370,12 @@ def index_page():
       <p>{esc(BIZ['address'])} · {esc(BIZ['hours'])}</p>
       <p><a href="tel:{esc(BIZ['phone'])}">{esc(BIZ['phoneDisplay'])}</a> · <a href="mailto:{esc(BIZ['email'])}">{esc(BIZ['email'])}</a></p>
       <p><a href="/">Back to {esc(BIZ['name'])}</a></p>
+      <nav class="aa-legal-links" aria-label="Legal information"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+      <p class="aa-copyright">© <span data-aa-year>{date.today().year}</span> {esc(BIZ['name'])}. All rights reserved.</p>
     </footer>
   </main>
 </div>
+<script src="/site-ux.js?v=4" defer></script>
 </body>
 </html>
 """
